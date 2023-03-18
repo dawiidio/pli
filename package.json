@@ -1,0 +1,79 @@
+{
+  "name": "@dawiidio/pli",
+  "version": "0.1.0",
+  "description": "",
+  "author": {
+    "email": "dawid@dawiid.io",
+    "name": "Dawid Wojda",
+    "url": "https://dawiid.io/"
+  },
+  "bin": {
+    "pli": "lib/index.js"
+  },
+  "main": "lib/exports.js",
+  "types": "lib/exports.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dawiidio/rss"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "private": false,
+  "keywords": [
+    "rss",
+    "itunes",
+    "podcast",
+    "rss2",
+    "xml",
+    "parser"
+  ],
+  "files": [
+    "lib",
+    "package.json"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "prepublishOnly": "npm run build",
+    "watch": "tsc -p ./tsconfig.node.json --watch",
+    "start": "node --experimental-modules lib/index.js",
+    "build": "npm run build:node",
+    "build:node": "tsc -p ./tsconfig.json && tsc-alias -p ./tsconfig.json",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.2.1",
+    "@types/node": "^18.15.3",
+    "@types/yargs": "^17.0.22",
+    "@typescript-eslint/eslint-plugin": "^5.45.1",
+    "@typescript-eslint/parser": "^5.47.0",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
+    "prettier": "2.6.2",
+    "rollup-plugin-typescript-paths": "^1.3.0",
+    "tsc-alias": "^1.8.2",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4",
+    "vite": "^4.1.4",
+    "vite-tsconfig-paths": "^4.0.5",
+    "vitest": "^0.25.3"
+  },
+  "packageManager": "yarn@1.22.19",
+  "peerDependencies": {
+    "typescript": "^4.6.4"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "@dawiidio/tools": "^0.2.0",
+    "@types/inquirer": "^9.0.3",
+    "commander": "^10.0.0",
+    "inquirer": "^8.2.5",
+    "ts-node": "^10.9.1",
+    "yargs": "^17.7.1"
+  }
+}

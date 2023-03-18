@@ -1,0 +1,57 @@
+{
+  "parserOptions": {
+    "sourceType": "module"
+  },
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2021": true
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "sort-imports-es6-autofix"
+  ],
+  "rules": {
+    "no-console": [
+      "error",
+      {
+        "allow": [
+          "warn",
+          "error"
+        ]
+      }
+    ],
+    "sort-imports-es6-autofix/sort-imports-es6": [
+      2,
+      {
+        "ignoreCase": true,
+        "ignoreMemberSort": true,
+        "memberSyntaxSortOrder": [
+          "none",
+          "all",
+          "multiple",
+          "single"
+        ]
+      }
+    ],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": ["@mui/*/*/*", "!@mui/material/test-utils/*"]
+      }
+    ],
+    "no-restricted-syntax": ["error", {
+      "selector": "ExportDefaultDeclaration",
+      "message": "Prefer named exports"
+    }],
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/consistent-type-imports": "error"
+  }
+}

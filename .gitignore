@@ -1,0 +1,12 @@
+node_modules
+/.cache
+/server/build
+/public/build
+.env
+tmp
+lib
+dist
+templates.ts
+.tmp
+templates
+test

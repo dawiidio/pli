@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.ts"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "module": "CommonJS",
+    "outDir": "lib",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+  }
+}
