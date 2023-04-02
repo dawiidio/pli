@@ -11,6 +11,7 @@ import {
     exitWithError,
 } from '~/common';
 import { createHash } from 'crypto';
+import { Template } from '~/template/Template';
 
 const DEFAULT_CONFIG: IFullConfig = {
     templates: [],
@@ -96,6 +97,8 @@ export const runTsTemplatesConfigFile = async (
     const newHash = await checkIfConfigFileChangedAndReturnNewHash(storage, pathToTemplatesConfig, cacheDir);
 
     if (newHash) {
+        console.log('\x1b[35m%s\x1b[0m', 'Config file changes detected, recompiling...');
+
         await saveConfigFileHashInCache(storage, newHash, cacheDir);
 
         try {
@@ -108,6 +111,7 @@ export const runTsTemplatesConfigFile = async (
             templatesConfigPath: pathToTemplatesConfig,
             rootDir: '.',
             outDir: tsOutputDir,
+
         });
     }
     const { default: config } = await import(storage.join(tsOutputDir, `${DEFAULT_CONFIG_FILENAME}.js`));
@@ -127,7 +131,7 @@ export interface IGetConfigFromFileOptions {
     cacheDir?: string
 }
 
-export const getConfigFromFile = async (path: string, storage: IStorage, options: IGetConfigFromFileOptions = {}): Promise<IFullConfig> => {
+export const getTemplatesConfigFromFile = async (path: string, storage: IStorage, options: IGetConfigFromFileOptions = {}): Promise<IFullConfig> => {
     const extension = extname(path).replace('.', '');
     let config: IConfig;
 

@@ -1,67 +1,26 @@
 #!/usr/bin/env node
 import { getStorage } from '~/storage/getStorage';
 import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
-import { getRenderer } from '~/renderer/getRenderer';
-import { getConfigFromFile } from '~/config/getConfigFromFile';
-import { mergeConfigTemplatesWithExtractedTemplates } from '~/config/mergeConfigTemplatesWithExtractedTemplates';
+import { getCliRenderer } from '~/cliRenderer/getCliRenderer';
+import { getTemplatesConfigFromFile } from '~/config/getTemplatesConfigFromFile';
+import { mergeRootConfigTemplatesWithExtractedTemplates } from '~/config/mergeRootConfigTemplatesWithExtractedTemplates';
 import { extractTemplatesFromDirectory } from '~/config/extractTemplatesFromDirectory';
-import { createVariableScopesForTemplates } from '~/config/createVariableScopesForTemplates';
-import { assertAndExit, CACHE_DIRNAME, createRootScope, createTreeFromPaths, GlobalBuiltinVariables } from '~/common';
-import { argv, cwd } from 'node:process';
-import yargs from 'yargs/yargs';
-import { hideBin } from 'yargs/helpers';
-import { Argv } from 'yargs';
+import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
+import { assertAndExit, CACHE_DIRNAME, createTreeFromPaths, BuiltinVariables } from '~/common';
+import { cwd } from 'node:process';
 import { saveRenderOutputToStorage } from '~/template/saveRenderOutputToStorage';
 import { searchForConfigFile } from '~/config/searchForConfigFile';
-
-interface ICliOptions {
-    config: string;
-
-    dry: boolean;
-
-    allowOverwriting: boolean;
-
-    templatesDirectory: string;
-}
-
-const DEFAULT_CLI_OPTIONS: Partial<ICliOptions> = {
-    dry: false,
-    allowOverwriting: false,
-};
-
-const getCliConfig = (): Partial<ICliOptions> => {
-    const cliOptions = (yargs(hideBin(argv)) as Argv<ICliOptions>)
-        .scriptName('pli')
-        .options('config', {
-            alias: 'c',
-            type: 'string',
-            description: 'relative path to config file',
-        })
-        .options('dry', {
-            alias: 'd',
-            type: 'boolean',
-            description: 'dry run, results will not be saved',
-        })
-        .options('allowOverwriting', {
-            alias: 'o',
-            type: 'boolean',
-            description: 'allow overwriting output files while committing data to storage',
-        })
-        .options('templatesDirectory', {
-            alias: 't',
-            type: 'boolean',
-            description: 'allow overwriting output files while committing data to storage',
-        })
-        .parse() as unknown as Partial<ICliOptions>;
-
-    return {
-        ...DEFAULT_CLI_OPTIONS,
-        ...cliOptions,
-    };
-};
+import { fetchTemplateEntriesContent } from '~/config/fetchTemplateEntriesContent';
+import { getRootCliConfig } from '~/config/getRootCliConfig';
+import { ITemplate } from '~/template/ITemplate';
 
 async function main() {
-    const cliConfig = await getCliConfig();
+    const cliConfig = await getRootCliConfig();
+
+    if (cliConfig.dry) {
+        console.log('\x1b[35m%s\x1b[0m', 'Dry run enabled - changes will not be saved');
+    }
+
     const storage = getStorage();
     const cwdPath = cwd();
     const templatesConfigFilePath = cliConfig.config
@@ -71,31 +30,32 @@ async function main() {
     assertAndExit<string>(templatesConfigFilePath, 'No config file found');
 
     const templateEngine = getTemplateEngine();
-    const userConfig = await getConfigFromFile(templatesConfigFilePath, storage, {
+    const userConfig = await getTemplatesConfigFromFile(templatesConfigFilePath, storage, {
         cacheDir: storage.resolve(CACHE_DIRNAME),
     });
     const templatesDirPath = cliConfig.templatesDirectory || storage.join(cwdPath, userConfig.templatesDir);
-    const rootScope = createRootScope({
-        // cwd is later overwritten, if needed, in each template collectVariables method call, this is how we can preserve templates structure
-        [GlobalBuiltinVariables.CWD]: '',
-        [GlobalBuiltinVariables.TEMPLATES_DIRECTORY]: templatesDirPath,
-        [GlobalBuiltinVariables.ROOT_CWD]: cwdPath,
-    });
-
     const extractedTemplates = await extractTemplatesFromDirectory(templatesDirPath, storage);
-    const mergedTemplates = mergeConfigTemplatesWithExtractedTemplates(userConfig.templates, extractedTemplates);
-    const templateToScopeMapping = await createVariableScopesForTemplates(mergedTemplates, templateEngine, storage, rootScope);
-    const renderer = getRenderer('cli', templateToScopeMapping);
+    const mergedRootTemplates = mergeRootConfigTemplatesWithExtractedTemplates(extractedTemplates, userConfig.templates);
+    await fetchTemplateEntriesContent(mergedRootTemplates, storage);
 
-    const selectedTemplate = await renderer.runTemplateSelectionUi();
-
-    await renderer.runVariablesUi(selectedTemplate);
-
-    const templateOutput = await selectedTemplate.render(
+    const templateTreeRenderer = new TemplateTreeRenderer(
+        mergedRootTemplates,
         templateEngine,
         storage,
-        templateToScopeMapping,
+        {
+            [BuiltinVariables.CWD]: undefined,
+            [BuiltinVariables.TEMPLATES_DIRECTORY]: templatesDirPath,
+            [BuiltinVariables.ROOT_CWD]: cwdPath,
+        },
     );
+
+    await templateTreeRenderer.collectVariables();
+
+    const cliRenderer = getCliRenderer('cli', templateTreeRenderer);
+    await cliRenderer.runTemplateSelectionUi();
+    await cliRenderer.runVariablesUiForSelectedTemplate();
+
+    const templateOutput = await templateTreeRenderer.render((cliRenderer.selectedTemplate as ITemplate).id as string);
 
     if (!cliConfig.dry) {
         await saveRenderOutputToStorage(templateOutput, storage, {
@@ -103,7 +63,7 @@ async function main() {
         });
     }
 
-    console.log('Inside directory \x1b[32m%s\x1b[0m the following structure was created', cwdPath);
+    console.log('Following structure was created inside directory \x1b[32m%s\x1b[0m', cwdPath);
     console.log(createTreeFromPaths(Object.keys(templateOutput), cwdPath, storage).replace('\n', ''));
 }
 

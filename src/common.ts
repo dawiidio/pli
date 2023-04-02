@@ -1,11 +1,17 @@
 import { TemplateVariable } from '~/templateVariable/TemplateVariable';
-import { VariableScope } from '~/variableScope/VariableScope';
 import { assert, setObjectPropertyByPath } from '@dawiidio/tools';
 import * as process from 'process';
 import { IStorage } from '~/storage/IStorage';
+import { VariableScope } from '~/variableScope/VariableScope';
+import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
+export type WithOptional<T, K extends keyof T> = Omit<T, K> & { [P in K]?: T[P] };
+
+export const PARENT_EVENTS_PREFIX = 'parent:';
 
 export const CACHE_DIRNAME = '.tmp';
-export const DEFAULT_CONFIG_FILENAME = 'templates';
+export const DEFAULT_CONFIG_FILENAME = 'pli.config';
 export const DEFAULT_TEMPLATES_DIRNAME = 'templates';
 
 export const DEFAULT_CONFIG_FILENAMES = [
@@ -13,39 +19,37 @@ export const DEFAULT_CONFIG_FILENAMES = [
     `${DEFAULT_CONFIG_FILENAME}.js`,
 ];
 
-export enum GlobalBuiltinVariables {
-
+export enum BuiltinVariables {
     CWD = 'CWD',
-
     ROOT_CWD = 'ROOT_CWD',
     TEMPLATES_DIRECTORY = 'TEMPLATES_DIRECTORY'
 }
 
-type ICreateRootScopeArgs = Record<GlobalBuiltinVariables, any>;
+export type ICreateRootScopeArgs = Record<BuiltinVariables, any>;
 
 export const createRootScope = (defaultValues: ICreateRootScopeArgs) => {
     const root = new VariableScope();
 
-    root.add([
+    root.bulkRegisterVariables([
         new TemplateVariable({
-            name: GlobalBuiltinVariables.CWD,
+            name: BuiltinVariables.CWD,
             defaultValue: defaultValues.CWD,
         }),
         new TemplateVariable({
-            name: GlobalBuiltinVariables.ROOT_CWD,
+            name: BuiltinVariables.ROOT_CWD,
             defaultValue: defaultValues.ROOT_CWD,
             readonly: true,
             ui: {
-                hidden: true
-            }
+                hidden: true,
+            },
         }),
         new TemplateVariable({
-            name: GlobalBuiltinVariables.TEMPLATES_DIRECTORY,
+            name: BuiltinVariables.TEMPLATES_DIRECTORY,
             defaultValue: defaultValues.TEMPLATES_DIRECTORY,
             readonly: true,
             ui: {
-                hidden: true
-            }
+                hidden: true,
+            },
         }),
     ]);
 
@@ -55,13 +59,12 @@ export const createRootScope = (defaultValues: ICreateRootScopeArgs) => {
 export const exitWithError = (err: string | Error) => {
     console.error(err);
     process.exit(1);
-}
+};
 
 export function assertAndExit<T = any>(value: any, message?: string): asserts value is NonNullable<T> {
     try {
         assert<T>(value, message);
-    }
-    catch (err) {
+    } catch (err) {
         exitWithError(err instanceof Error ? err.message : (err as string));
     }
 }
@@ -73,7 +76,7 @@ export const createTreeFromPaths = (paths: string[], basePath: string, storage: 
         const shortenedPath = path.replace(basePath, '');
         accObj = {
             ...accObj,
-            ...setObjectPropertyByPath(accObj, storage.splitPath(shortenedPath), 1)
+            ...setObjectPropertyByPath(accObj, storage.splitPath(shortenedPath), 1),
         };
     }
 
@@ -85,15 +88,40 @@ export const createTreeFromPaths = (paths: string[], basePath: string, storage: 
             const directory = typeof val === 'object';
 
             if (!lvl) {
-                return acc+logger(val, currentPath, lvl+1);
+                return acc + logger(val, currentPath, lvl + 1);
             }
 
             return directory
-                ? `${acc}\n${currentPath}${childSign}${key}/${logger(val, currentPath+levelSign, lvl+1)}`
+                ? `${acc}\n${currentPath}${childSign}${key}/${logger(val, currentPath + levelSign, lvl + 1)}`
                 : `${acc}\n${currentPath}${childSign}${key}`;
         }, '');
-    }
+    };
 
     return logger(accObj);
+};
+
+export const removeVariableDuplicates = (variables: ITemplateVariable[]): ITemplateVariable[] => {
+    const addedVariables = new Set<string>();
+
+    return variables.filter((variable) => {
+        if (addedVariables.has(variable.name)) {
+            return false;
+        }
+
+        addedVariables.add(variable.name);
+        return true;
+    });
 }
 
+export const checkForVariableDuplicates = (variables: ITemplateVariable[]): ITemplateVariable[] => {
+    const addedVariables = new Set<string>();
+
+    return variables.map((variable) => {
+        if (addedVariables.has(variable.name)) {
+            throw new Error(`Variable ${variable.name} is defined multiple times`);
+        }
+
+        addedVariables.add(variable.name);
+        return variable;
+    });
+}

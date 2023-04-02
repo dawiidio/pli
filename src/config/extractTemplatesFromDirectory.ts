@@ -1,8 +1,10 @@
 import { IStorage } from '~/storage/IStorage';
 import { getStorage } from '~/storage/getStorage';
 import { ITemplate } from '~/template/ITemplate';
-import { ITemplateEntry, Template } from '~/template/Template';
+import { Template } from '~/template/Template';
 import { assertAndExit, exitWithError } from '~/common';
+import { ITemplateEntry } from '~/templateEntry/ITemplateEntry';
+import { TemplateEntry } from '~/templateEntry/TemplateEntry';
 
 export const extractTemplatesFromDirectory = async (templatesPath: string, storage: IStorage = getStorage()): Promise<ITemplate[]> => {
     try {
@@ -28,13 +30,14 @@ export const extractTemplatesFromDirectory = async (templatesPath: string, stora
         return new Template({
             name: id,
             id,
-            templates: await Promise.all(paths.map(async (source): Promise<ITemplateEntry> => {
+            entries: await Promise.all(paths.map(async (source): Promise<ITemplateEntry> => {
                 const content = await storage.read(source);
 
-                return {
+                return new TemplateEntry({
                     source,
                     content,
-                };
+                    dynamic: false
+                });
             })),
         });
     }));

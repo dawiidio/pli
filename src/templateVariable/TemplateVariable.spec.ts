@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TemplateVariable } from './TemplateVariable';
 
-describe('Variable', () => {
+describe('TemplateVariable', () => {
     it('should transform value in pipe to valid type and resolve variable with the same value and type', async () => {
         const variable = new TemplateVariable<string>({
             name: 'foo',
@@ -9,8 +9,8 @@ describe('Variable', () => {
 
         variable.pipe((val: string) => parseFloat(val));
 
-        variable.setValue('24.53');
+        const value = variable.transformValue('24.53');
 
-        expect(variable.getValue()).toBe(24.53);
+        expect(value).toBe(24.53);
     });
 });

@@ -26,7 +26,7 @@ export const saveRenderOutputToStorage = async (renderOutput: Record<string, str
     if (!options.allowOverwriting) {
         for (const path of files) {
             try {
-                // if file already exists, and we can't overwrite it then exit
+                // if file already exists, and we can't overwrite it then exit, it may change in the future when files editing will be added
                 await storage.access(path, FileSystemStorage.modes.W);
                 exitWithError(`Error occurred while saving output to storage. Changes haven't been saved. Original error message:\nOverwriting is disabled and file ${path} already exists`);
             }

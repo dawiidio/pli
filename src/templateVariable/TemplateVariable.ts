@@ -1,15 +1,13 @@
-import { IVariableScope } from '~/variableScope/IVariableScope';
 import { LazyPipe } from '@dawiidio/tools';
-import { ITemplateVariable, IVariableUiDescriptor, IVariableUiOption } from '~/templateVariable/ITemplateVariable';
+import { ITemplateVariable, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable';
+import { IVariableScope } from '~/variableScope/IVariableScope';
 
 export interface IVariableProps<T = any> {
     name: string,
 
-    defaultValue?: T | undefined;
+    defaultValue?: T | undefined | string;
 
     validate?: (value: T, variable: ITemplateVariable<T>, ctx: IVariableScope) => void;
-
-    options?: IVariableUiOption<T>[] | string[]
 
     ui?: Partial<IVariableUiDescriptor>;
 
@@ -18,59 +16,61 @@ export interface IVariableProps<T = any> {
     readonly?: boolean;
 
     overridable?: boolean;
+
+    index?: number
 }
 
-export class TemplateVariable<T = any> implements IVariableProps<T> {
+export class TemplateVariable<T = any> implements ITemplateVariable<T> {
 
-    public defaultValue: T | undefined;
+    public defaultValue: T | undefined | string;
 
     public multiple = false;
 
     public name: string;
 
-    public options: IVariableUiOption[];
-
     public ui: IVariableUiDescriptor;
+
+    public index: number;
 
     public overridable: boolean;
 
     public readonly: boolean;
-
-    public validate: (value: T, variable: ITemplateVariable<T>, ctx: IVariableScope) => void = () => {};
-
     private value: T | undefined = undefined;
-
     private lazyPipe = new LazyPipe<T>();
 
-    constructor({ validate, defaultValue, name, options = [], ui, multiple, readonly = false, overridable = true }: IVariableProps<T>) {
+    constructor({
+                    validate,
+                    defaultValue,
+                    name,
+                    ui,
+                    multiple,
+                    readonly = false,
+                    overridable = true,
+                    index = 500,
+                }: IVariableProps<T>) {
         this.name = name;
         this.validate = validate || this.validate;
         this.defaultValue = defaultValue;
-        this.value = this.defaultValue;
         this.multiple = multiple || false;
         this.readonly = readonly;
+        this.index = index;
         this.overridable = overridable;
-        this.options = options?.map(option => {
-            if (typeof option !== 'string')
-                return option;
-
-            return {
-                value: option,
-                label: option,
-            };
-        });
 
         this.ui = {
             type: 'input',
             message: `Insert value for ${name} :`,
             hidden: false,
-            ...(ui || {})
-        }
+            options: [],
+            ...(ui || {}),
+        };
     }
 
-    getValue(): T | undefined {
-        return this.value;
+    static isTemplateVariable(predicate: any): predicate is TemplateVariable {
+        return predicate instanceof TemplateVariable;
     }
+
+    public validate: (value: T, variable: ITemplateVariable<T>, ctx: IVariableScope) => void = () => {
+    };
 
     pipe(...transformers: ((val: any) => any)[]): this {
         this.lazyPipe.pipe(...transformers);
@@ -78,37 +78,46 @@ export class TemplateVariable<T = any> implements IVariableProps<T> {
         return this;
     }
 
-    setValue(value: any): void {
-        if (this.readonly)
-            throw new Error(`Variable ${this.name} is readonly`);
-
-        this.value = this.lazyPipe.run(value);
+    transformValue(value: any): T {
+        return this.lazyPipe.run(value);
     }
 
-    merge<T = any>({ name, ui, multiple, options, lazyPipe, defaultValue, validate, value }: TemplateVariable<T>): TemplateVariable<T> {
+    merge<T = any>({
+                       name,
+                       ui,
+                       multiple,
+                       lazyPipe,
+                       defaultValue,
+                       validate,
+                       value,
+                   }: TemplateVariable<T>): TemplateVariable<T> {
         const variable = new TemplateVariable<T>({
             name: name || this.name,
             ui: {
                 ...this.ui,
-                ...ui
+                ...ui,
+                options: (ui.options || this.ui.options)
+                    ? [
+                        ...(this.ui.options || []),
+                        ...(ui.options || []),
+                    ]
+                    : undefined,
             },
             // @ts-ignore
             validate: validate || this.validate,
             overridable: this.overridable,
-            options: (options || this.options)
-                ? [
-                    ...(this.options || []),
-                    ...(options || [])
-                ]
-                : undefined,
             multiple: multiple || this.multiple,
             defaultValue: (defaultValue || this.defaultValue) as T,
         });
 
-        variable.value = value;
+        variable.value = value || this.value as T;
         // todo merge pipeline transformers
         variable.lazyPipe = lazyPipe;
 
         return variable;
+    }
+
+    clone(): ITemplateVariable<T> {
+        return this.merge(this);
     }
 }

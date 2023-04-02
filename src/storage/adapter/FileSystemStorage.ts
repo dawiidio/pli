@@ -1,6 +1,6 @@
 import { readdirRecursively } from '@dawiidio/tools';
 import { promises, constants } from 'node:fs';
-import { extname, relative, sep, resolve, join, dirname } from 'path';
+import { extname, relative, sep, resolve, join, dirname, basename } from 'path';
 
 const { readFile, writeFile, mkdir, access } = promises;
 const { W_OK, R_OK } = constants;
@@ -10,6 +10,8 @@ export class FileSystemStorage {
         W: W_OK,
         R: R_OK,
     }
+
+    static sep = sep;
 
     static async read(path: string): Promise<string> {
         return (await readFile(path)).toString();
@@ -55,5 +57,9 @@ export class FileSystemStorage {
 
     static dirname(path: string): string {
         return dirname(path);
+    }
+
+    static basename(path: string): string {
+        return basename(path);
     }
 }

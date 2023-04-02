@@ -35,7 +35,8 @@
   "license": "MIT",
   "scripts": {
     "prepublishOnly": "npm run build",
-    "watch": "tsc -p ./tsconfig.node.json --watch",
+    "watch": "tsc -p ./tsconfig.json --watch",
+    "watch-alias": "tsc-alias -p ./tsconfig.json --watch",
     "start": "node --experimental-modules lib/index.js",
     "build": "npm run build:node",
     "build:node": "tsc -p ./tsconfig.json && tsc-alias -p ./tsconfig.json",
@@ -69,7 +70,7 @@
     }
   },
   "dependencies": {
-    "@dawiidio/tools": "^0.2.0",
+    "@dawiidio/tools": "0.4.0",
     "@types/inquirer": "^9.0.3",
     "commander": "^10.0.0",
     "inquirer": "^8.2.5",

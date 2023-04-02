@@ -1,167 +1,284 @@
 import { describe, expect, it } from 'vitest';
 import { Template } from './Template';
-import { TemplateVariable } from '../templateVariable/TemplateVariable';
 import { getTemplateEngine } from '../templateEngine/getTemplateEngine';
+import { getStorage } from '../storage/getStorage';
+import { createRootScope, DEFAULT_TEMPLATES_DIRNAME, BuiltinVariables } from '../common';
+import { TemplateEntry } from '../templateEntry/TemplateEntry';
+import { TemplateTreeRenderer } from '../templateTreeRenderer/TemplateTreeRenderer';
+import { TemplateVariable } from '../templateVariable/TemplateVariable';
 
-
+//todo uncomment
 describe('Template', () => {
+    const cwd = '';
+    const rootCwd = 'test';
+    const storage = getStorage('fs');
+    const engine = getTemplateEngine('base');
+    const rootScopeDefaults = {
+        [BuiltinVariables.ROOT_CWD]: rootCwd,
+        [BuiltinVariables.TEMPLATES_DIRECTORY]: DEFAULT_TEMPLATES_DIRNAME,
+        [BuiltinVariables.CWD]: cwd,
+    };
+
+    const getRootScope = () => {
+        return createRootScope({
+            [BuiltinVariables.ROOT_CWD]: rootCwd,
+            [BuiltinVariables.TEMPLATES_DIRECTORY]: DEFAULT_TEMPLATES_DIRNAME,
+            [BuiltinVariables.CWD]: cwd,
+        });
+    };
+
     it('should extract variables from string template', async () => {
         const template = new Template({
-            templates: [
-                {
+            id: 'template',
+            entries: [
+                new TemplateEntry({
                     source: '/tmp/path/file.ts',
                     content: `function $NAME$() { return 'Function $NAME$, $OTHER_VARIABLE$'; }`,
-                },
+                }),
             ],
         });
-        const engine = getTemplateEngine('base');
-        const ctx = template.collectVariables(engine);
+        const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
+        const scope = templateTreeRenderer.getBranchForTemplateId(template.id);
+        const variableValues = scope.scope.collectAllBranchVariablesValues();
 
-        const variables = ctx.getAllVariables();
-
-        expect(Object.keys(variables)).toHaveLength(2);
-        expect(variables.NAME).not.toBeUndefined();
-        expect(variables.OTHER_VARIABLE).not.toBeUndefined();
+        expect(Object.keys(variableValues)).toHaveLength(5);
+        expect(variableValues).toEqual(expect.objectContaining({
+            NAME: undefined,
+            OTHER_VARIABLE: undefined
+        }));
     });
 
     it('should throw error on interpolating paths when variable is undefined', async () => {
         const template = new Template({
-            templates: [
-                {
+            id: 'x',
+            entries: [
+                new TemplateEntry({
                     source: '/tmp/$NAME$/file.ts',
                     content: `function $NAME$() { return 'Function $NAME$'; }`,
-                },
+                }),
+            ],
+        });
+        const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
+        const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
+
+        // console.log('path without variable', template.resolveOutputMapping(engine, storage, scope));
+
+        expect(() => template.resolveOutputMapping(engine, storage, scope)).toThrowError('Variable NAME is undefined');
+    });
+
+    it('should throw error when TemplateEntry still has empty content field on collecting variables phase', async () => {
+        const template = new Template({
+            id: 'x',
+            entries: [
+                new TemplateEntry({
+                    source: '/tmp/$NAME$/file.ts',
+                    content: ``,
+                }),
             ],
         });
         const engine = getTemplateEngine('base');
-        const ctx = template.collectVariables(engine);
+        const rootScope = getRootScope();
 
-        expect(() => template.resolveOutputMapping(engine, ctx)).toThrowError('Variable NAME has no value to render');
+        expect(() => template.collectVariables(engine, storage, rootScope)).toThrowError('Entry /tmp/$NAME$/file.ts has no content to extract variables from');
     });
 
     it('should interpolate paths with variables from context', async () => {
         const template = new Template({
-            templates: [
-                {
+            id: 'x',
+            entries: [
+                new TemplateEntry({
                     source: '/tmp/$NAME$/file.ts',
-                    content: ``,
-                },
+                    content: `Test test`,
+                }),
             ],
         });
-        const engine = getTemplateEngine('base');
-        const ctx = template.collectVariables(engine);
+        const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
+        const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
 
-        ctx.getVariableByName('NAME').setValue('dirname');
+        scope.setVariableValue('NAME', 'dirname');
 
-        expect(template.resolveOutputMapping(engine, ctx)).toStrictEqual(expect.objectContaining({
-            '/tmp/$NAME$/file.ts': '/tmp/dirname/file.ts',
+        expect(template.resolveOutputMapping(engine, storage, scope)).toStrictEqual(expect.objectContaining({
+            '/tmp/$NAME$/file.ts': `${rootCwd}/tmp/dirname/file.ts`,
         }));
-
     });
 
     it('should render template', async () => {
         const template = new Template({
-            templates: [
-                {
-                    source: '/tmp/$NAME$/$NAME$.ts',
+            id: 'x',
+            entries: [
+                new TemplateEntry({
+                    source: '$NAME$.ts',
                     content: `function $NAME$() { return 'Function $NAME$'; }`,
-                },
+                }),
             ],
         });
-        const engine = getTemplateEngine('base');
-        const ctx = template.collectVariables(engine);
+        const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
+        const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
 
-        ctx.getVariableByName('NAME').setValue('MyFunction');
+        scope.setVariableValueFromTop('NAME', 'MyFunction');
 
-        expect(await template.render(engine, ctx)).toStrictEqual(expect.objectContaining({
-            '/tmp/MyFunction/MyFunction.ts': `function MyFunction() { return 'Function MyFunction'; }`,
+        expect(await templateTreeRenderer.render(template.id)).toStrictEqual(expect.objectContaining({
+            [`${rootCwd}/MyFunction.ts`]: `function MyFunction() { return 'Function MyFunction'; }`,
         }));
     });
 
-    it('should render many string templates', async () => {
+    it.only('should render many entries', async () => {
         const template = new Template({
-            templates: [
-                {
-                    source: '/tmp/$NAME$/$NAME$.ts',
+            id: 'x',
+            entries: [
+                new TemplateEntry({
+                    source: '$NAME$.ts',
                     content: `function $NAME$() { return 'Function $NAME$'; }`,
-                },
-                {
-                    source: '/tmp/$NAME$/$NAME$.spec.ts',
+                }),
+                new TemplateEntry({
+                    source: '$NAME$.spec.ts',
                     content: `test('$NAME$ should do something', () => { expect($NAME$()).toBeString(); })`,
-                },
+                }),
             ],
+            defaultOutputDirectoryPath: 'tmp/$NAME$',
         });
-        const engine = getTemplateEngine('base');
-        const ctx = template.collectVariables(engine);
+        const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
+        const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
 
-        ctx.getVariableByName('NAME').setValue('MyFunction');
+        scope.setVariableValueFromTop('NAME', 'MyFunction');
 
-        expect(await template.render(engine, ctx)).toStrictEqual(expect.objectContaining({
-            '/tmp/MyFunction/MyFunction.ts': `function MyFunction() { return 'Function MyFunction'; }`,
-            '/tmp/MyFunction/MyFunction.spec.ts': `test('MyFunction should do something', () => { expect(MyFunction()).toBeString(); })`,
+        expect(await templateTreeRenderer.render(template.id)).toStrictEqual(expect.objectContaining({
+            [`${rootCwd}/tmp/MyFunction/MyFunction.ts`]: `function MyFunction() { return 'Function MyFunction'; }`,
+            [`${rootCwd}/tmp/MyFunction/MyFunction.spec.ts`]: `test('MyFunction should do something', () => { expect(MyFunction()).toBeString(); })`,
         }));
     });
 
     it('should change output path to the one overwritten in output mapping', async () => {
         const template = new Template({
-            templates: [
-                {
-                    source: '/tmp/$NAME$/$NAME$.ts',
+            id: 'x',
+            entries: [
+                new TemplateEntry({
+                    source: '$NAME$.ts',
                     content: `function $NAME$() { return 'Function $NAME$'; }`,
-                },
+                }),
             ],
-            output: {
-                '/tmp/$NAME$/$NAME$.ts': '/tmp/$NEW_VARIABLE$/$NAME$.ts',
+            outputMapping: {
+                '$NAME$.ts': '/tmp/$NEW_VARIABLE$/$NAME$.ts',
             },
         });
-        const engine = getTemplateEngine('base');
-        const ctx = template.collectVariables(engine);
+        const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
+        const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
 
-        ctx.getVariableByName('NAME').setValue('MyFunction');
-        ctx.getVariableByName('NEW_VARIABLE').setValue('lorem');
+        scope.setVariableValueFromTop('NAME', 'MyFunction')
+        scope.setVariableValueFromTop('NEW_VARIABLE', 'lorem');
 
-        expect(await template.render(engine, ctx)).toStrictEqual(expect.objectContaining({
-            '/tmp/lorem/MyFunction.ts': `function MyFunction() { return 'Function MyFunction'; }`,
+        expect(await templateTreeRenderer.render(template.id)).toStrictEqual(expect.objectContaining({
+            [`${rootCwd}/tmp/lorem/MyFunction.ts`]: `function MyFunction() { return 'Function MyFunction'; }`,
         }));
     });
 
     it('should render with child template', async () => {
         const childTemplate = new Template({
-            templates: [
-                {
-                    source: '/tmp/$NAME$/$NAME$.ts',
+            id: 'x',
+            entries: [
+                new TemplateEntry({
+                    source: '$NAME$.ts',
                     content: `function $NAME$() { return 'Function $NAME$'; }`,
-                },
+                }),
             ],
-            output: {
-                '/tmp/$NAME$/$NAME$.ts': '/tmp/$NEW_VARIABLE$/$NAME$.ts',
-            },
+            // todo put this example to docs
+            outputMapping: {
+                '$NAME$.ts': 'tmp/$NAME$/$NAME$.ts',
+            }
         });
 
         const parentTemplate = new Template({
-            templates: [childTemplate],
+            id: 'y',
+            entries: [childTemplate],
         });
 
-        const engine = getTemplateEngine('base');
-        const ctx = parentTemplate.collectVariables(engine);
+        const templateTreeRenderer = new TemplateTreeRenderer([parentTemplate], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
+        const { scope } = templateTreeRenderer.getBranchForTemplateId(parentTemplate.id);
 
-        ctx.getGlobalVariableByName('NAME').setValue('MyFunction');
-        ctx.getGlobalVariableByName('NEW_VARIABLE').setValue('lorem');
+        scope.setVariableValueFromTop('NAME', 'MyFunction');
 
-        expect(await parentTemplate.render(engine, ctx)).toStrictEqual(expect.objectContaining({
-            '/tmp/lorem/MyFunction.ts': `function MyFunction() { return 'Function MyFunction'; }`,
+        expect(await templateTreeRenderer.render(parentTemplate.id)).toStrictEqual(expect.objectContaining({
+            [`${rootCwd}/tmp/MyFunction/MyFunction.ts`]: `function MyFunction() { return 'Function MyFunction'; }`,
         }));
     });
 
-    it('should get variables passed in template "variables" prop field', async () => {
-        const childTemplate = new Template({
-            templates: [
-                {
+    it('should merge templates', async () => {
+        const T1 = new Template({
+            id: 'x',
+            name: 'Name 1',
+            entries: [
+                new TemplateEntry({
                     source: '/tmp/$NAME$/$NAME$.ts',
                     content: `function $NAME$() { return 'Function $NAME$'; }`,
-                },
+                }),
+                new TemplateEntry({
+                    source: '/tmp/dir/file1.ts',
+                    content: `function $NAME$() { return 'Function $NAME$'; }`,
+                }),
             ],
-            output: {
+            variables: [
+                new TemplateVariable({
+                    name: 'NAME',
+                    defaultValue: 't1 value'
+                }),
+                new TemplateVariable({
+                    name: 'T1_VAR',
+                    defaultValue: '1'
+                }),
+            ]
+        });
+
+        const T2 = new Template({
+            id: 'x',
+            entries: [
+                new TemplateEntry({
+                    source: '/tmp/$NAME$/$NAME$.ts',
+                    content: `function $NAME$() { return 'Function $NAME$'; }`,
+                }),
+                new TemplateEntry({
+                    source: '/tmp/dir/file2.ts',
+                    content: `function $NAME$() { return 'Function $NAME$'; }`,
+                }),
+            ],
+            variables: [
+                new TemplateVariable({
+                    name: 'NAME',
+                    defaultValue: 't2 value'
+                }),
+                new TemplateVariable({
+                    name: 'T2_VAR',
+                    defaultValue: '2'
+                }),
+            ]
+        });
+
+        const merged = T1.merge(T2);
+
+        expect(merged.variables).toHaveLength(3);
+        expect(merged.variables.find(v => v.name === 'T2_VAR')?.defaultValue).toBe('2');
+        expect(merged.variables.find(v => v.name === 'T1_VAR')?.defaultValue).toBe('1');
+        expect(merged.variables.find(v => v.name === 'NAME')?.defaultValue).toBe('t2 value');
+        expect(merged.getTemplateEntries()).toHaveLength(3);
+        expect(merged.name).toEqual('Name 1');
+    });
+
+    it('should collect variables in parent from passed child template', async () => {
+        const childTemplate = new Template({
+            id: 'x',
+            entries: [
+                new TemplateEntry({
+                    source: '/tmp/$NAME$/$NAME$.ts',
+                    content: `function $NAME$() { return 'Function $NAME$'; }`,
+                }),
+            ],
+            outputMapping: {
                 '/tmp/$NAME$/$NAME$.ts': '/tmp/$NEW_VARIABLE$/$NAME$.ts',
             },
             variables: [
@@ -177,14 +294,15 @@ describe('Template', () => {
         });
 
         const parentTemplate = new Template({
-            templates: [childTemplate],
+            id: 'y',
+            entries: [childTemplate],
         });
 
-        const engine = getTemplateEngine('base');
-        const ctx = parentTemplate.collectVariables(engine);
+        const templateTreeRenderer = new TemplateTreeRenderer([parentTemplate], engine, storage, rootScopeDefaults);
+        templateTreeRenderer.collectVariables();
 
-        expect(await parentTemplate.render(engine, ctx)).toStrictEqual(expect.objectContaining({
-            '/tmp/lorem/ipsum.ts': `function ipsum() { return 'Function ipsum'; }`,
+        expect(await templateTreeRenderer.render(parentTemplate.id)).toStrictEqual(expect.objectContaining({
+            [`${rootCwd}/tmp/lorem/ipsum.ts`]: `function ipsum() { return 'Function ipsum'; }`,
         }));
     });
 });

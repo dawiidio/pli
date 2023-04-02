@@ -6,7 +6,7 @@ node_modules
 tmp
 lib
 dist
-templates.ts
+/templates.ts
 .tmp
-templates
+/templates
 test

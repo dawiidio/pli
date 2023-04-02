@@ -24,18 +24,20 @@ export interface IVariableUiDescriptor {
     message: string;
 
     hidden: boolean;
+
+    options: IVariableUiOption[];
 }
 
 export interface ITemplateVariable<T = any> {
     name: string,
 
-    defaultValue?: T | undefined;
+    defaultValue?: T | undefined | string;
 
     validate: (value: T, variable: ITemplateVariable<T>, ctx: IVariableScope) => void;
 
-    options?: IVariableUiOption<T>[] | string[]
-
     ui: IVariableUiDescriptor;
+
+    index: number;
 
     multiple?: boolean;
 
@@ -43,9 +45,11 @@ export interface ITemplateVariable<T = any> {
 
     overridable?: boolean;
 
-    getValue(): T | undefined;
-
-    setValue(value: any): void;
-
     merge(variable: ITemplateVariable): ITemplateVariable;
+
+    pipe(...transformers: ((val: any) => any)[]): ITemplateVariable
+
+    transformValue(value: any): T;
+
+    clone(): ITemplateVariable<T>;
 }

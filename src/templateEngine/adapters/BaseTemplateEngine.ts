@@ -1,7 +1,5 @@
 import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { VariableScope } from '~/variableScope/VariableScope';
-import { assert } from '@dawiidio/tools';
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import { ITemplateEngineContext } from '~/templateEngine/ITemplateEngineContext';
 
 export class BaseTemplateEngine implements ITemplateEngine {
     static readonly globalVariableRegex = /\$([\w\d]+)\$/g;
@@ -10,24 +8,33 @@ export class BaseTemplateEngine implements ITemplateEngine {
         return new RegExp(`\\$(${name})\\$`, 'g');
     }
 
+    getVariableTemplateForName(name: string): string {
+        return `$${name}$`;
+    }
+
     extractAllVariables(text: string): string[] {
         const variables = text.match(BaseTemplateEngine.globalVariableRegex) || [];
 
         return [...new Set<string>(variables).values()].map(s => s.replaceAll('$', ''));
     }
 
-    replaceVariable(text: string, variable: ITemplateVariable): string {
-        const value = variable.getValue();
-
-        assert(value !== undefined, `Variable ${variable.name} has no value to render`);
-
-        return text.replaceAll(BaseTemplateEngine.getRegexpForVariable(variable.name), String(value));
+    replaceVariable(text: string, variableName: string, value: any = ''): string {
+        return text.replaceAll(BaseTemplateEngine.getRegexpForVariable(variableName), String(value));
     }
 
-    renderTemplate(text: string, ctx: VariableScope): string {
-        return Object.values(ctx.getAllVariables()).reduce(
-            (acc, variable) => this.replaceVariable(acc, variable),
-            text
-        );
+    renderTemplate(text: string, ctx: ITemplateEngineContext, throwOnUndefined = false): string {
+        return this.extractAllVariables(text).reduce((acc, name) => {
+            const value = ctx.getVariableValue(name);
+
+            if (throwOnUndefined && (value === undefined || value === '')) {
+                throw new Error(`Variable ${name} is undefined`);
+            }
+
+            return this.replaceVariable(acc, name, value);
+        }, text);
+    }
+
+    hasVariables(template: string): boolean {
+        return BaseTemplateEngine.globalVariableRegex.test(template);
     }
 }

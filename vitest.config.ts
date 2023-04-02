@@ -15,6 +15,7 @@ export default defineConfig({
         },
     },
     test: {
+        exclude: ['examples/**/*', 'templates/**/*', 'test'],
         globals: true,
         reporters: 'default',
         environment: 'node',

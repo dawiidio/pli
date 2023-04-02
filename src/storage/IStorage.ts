@@ -4,6 +4,8 @@ export interface IStorage {
         R: number,
     }
 
+    sep: string;
+
     read(path: string): Promise<string>;
 
     write(path: string, content: string): Promise<void>;
@@ -25,4 +27,6 @@ export interface IStorage {
     join(...path: string[]): string;
 
     dirname(path: string): string;
+
+    basename(path: string): string;
 }

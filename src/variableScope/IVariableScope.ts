@@ -1,29 +1,52 @@
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import type { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import type { EventEmitter } from '@dawiidio/tools';
 
-export interface IVariableScope {
-    variables: ITemplateVariable[];
+export interface IVariableChangeEvent {
+    variable: ITemplateVariable;
 
-    add(variable: ITemplateVariable | ITemplateVariable[]): void;
+    transformedValue: any;
 
-    remove(variable: ITemplateVariable): void;
+    scope: IVariableScope;
+}
 
-    getVariableByName(name: string): ITemplateVariable;
+export interface IVariableScope extends EventEmitter {
+    readonly id: string;
 
-    resolveValue<T = any>(name: string): T;
+    children: Set<IVariableScope>;
 
-    validate(): void;
+    spawnChild(): IVariableScope;
 
-    spawnChildContext(): IVariableScope;
+    addChild(scope: IVariableScope): void;
 
-    destroyChildContexts(): void;
+    registerVariable(variable: ITemplateVariable): void;
 
-    destroy(): void;
+    bulkRegisterVariables(variables: ITemplateVariable[]): void
 
-    getAllVariables(): Record<string, ITemplateVariable>;
+    setVariableValue<T = any>(name: string, value: T): void;
 
-    getGlobalVariableByName(name: string): ITemplateVariable;
+    getVariableValue<T = any>(name: string): T | undefined
 
-    setValuesFromObject(valuesMap: Record<string, any>): void;
+    getVariable<T = any>(name: string): ITemplateVariable;
 
-    resolveVariable(name: string): ITemplateVariable;
+    hasVariable(name: string): boolean;
+
+    collectAllBranchVariablesValues<T extends Record<string, any> = Record<string, any>>(): T;
+
+    collectAllBranchVariables(): ITemplateVariable[];
+
+    setVariableValueFromTop<T = any>(name: string, value: T): void;
+
+    assignValuesFromObject(valuesObject: Record<string, any>): void;
+
+    assignValuesObjectFromTop(valuesObject: Record<string, any>): void;
+
+    findFirstScopesFromTopWithVariable(name: string): IVariableScope[];
+
+    findFirstScopeFromBottomWithVariable(name: string): IVariableScope | undefined;
+
+    getVariableFromTop<T = any>(name: string): ITemplateVariable;
+
+    isRoot(): boolean;
+
+    findFirstScopeFromBottomWithNonNullableVariableValue(name: string): IVariableScope | undefined;
 }
