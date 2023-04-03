@@ -6,3 +6,4 @@ export { TemplateVariable } from '~/templateVariable/TemplateVariable';
 export type { IVariableProps } from '~/templateVariable/TemplateVariable';
 export type { IConfig } from '~/config/IConfig';
 export { TemplateEntry } from '~/templateEntry/TemplateEntry';
+export type { IVariableScope } from '~/variableScope/IVariableScope';

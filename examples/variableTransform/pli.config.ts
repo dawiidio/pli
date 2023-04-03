@@ -1,12 +1,14 @@
-import { Template } from '@dawiidio/pli';
-import { IConfig } from '@dawiidio/pli';
-import { TemplateVariable } from '@dawiidio/pli';
+import { Template } from '../../lib/exports';
+import { IConfig } from '../../lib/exports';
+import { TemplateVariable } from '../../lib/exports';
 
 const variable = new TemplateVariable({
     name: 'VALUE',
 });
 
-variable.pipeValue(
+// here we are using pipe to transform variable value
+// piped value will be used in template
+variable.pipe(
     (val: string) => parseInt(val),
     (val: number) => val * 2,
 );

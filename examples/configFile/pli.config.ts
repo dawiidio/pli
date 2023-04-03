@@ -1,6 +1,6 @@
-import { Template } from '@dawiidio/pli';
-import { IConfig } from '@dawiidio/pli';
-import { TemplateVariable } from '@dawiidio/pli';
+import { Template } from '../../lib/exports';
+import { IConfig } from '../../lib/exports';
+import { TemplateVariable } from '../../lib/exports';
 
 const config: IConfig = {
     templates: [

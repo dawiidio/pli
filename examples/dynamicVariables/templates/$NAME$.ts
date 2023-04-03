@@ -1,3 +1,3 @@
-export function $NAME$() {
-    return $VALUE$;
+export function getWelcomeString() {
+    return '$RESULTS$';
 }

@@ -1,17 +1,21 @@
-import { TemplateVariable, TemplateEntry, IConfig, Template } from '@dawiidio/pli';
+import { IConfig, Template, TemplateEntry, TemplateVariable } from '../../lib/exports';
+
+// when you have template file but you want to change or add some variables
+const staticTemplate = new Template({
+    name: 'Static template',
+    id: 'test.ts',
+    variables: [
+        new TemplateVariable({
+            name: 'TEST',
+            defaultValue: 'MyTestName',
+        }),
+    ],
+});
 
 const config: IConfig = {
     templates: [
-        new Template({
-            name: 'Static template',
-            id: 'test.ts',
-            variables: [
-                new TemplateVariable({
-                    name: 'TEST',
-                    defaultValue: 'lorem ipsum dolor',
-                }),
-            ],
-        }),
+        staticTemplate,
+        //
         new Template({
             name: 'Hybrid template',
             // you can provide existing template id
@@ -19,13 +23,15 @@ const config: IConfig = {
             variables: [
                 new TemplateVariable({
                     name: 'NAME',
-                    defaultValue: 'MyName',
+                    defaultValue: 'MyNewName',
                 }),
             ],
-            // and here provide additional templates
-            templates: [
-                '$DIRNAME$/$NAME$.ts',
-            ]
+            // and here provide additional entries or templates
+            entries: [
+                new TemplateEntry({
+                    source: '$DIRNAME$/$NAME$.ts',
+                })
+            ],
         }),
         new Template({
             name: 'Dynamic template',
@@ -34,10 +40,10 @@ const config: IConfig = {
             variables: [
                 new TemplateVariable({
                     name: 'NAME',
-                    defaultValue: 'MyName',
+                    defaultValue: 'Name',
                 }),
             ],
-            templates: [
+            entries: [
                 // you can dynamically pick files from many templates and combine them into new template
                 new TemplateEntry({
                     source: '$DIRNAME$/$NAME$.ts',
@@ -47,11 +53,13 @@ const config: IConfig = {
                 new TemplateEntry({
                     source: '$NAME$DynamicFile.ts',
                     content: `export const $NAME$ = 'My Dynamic template';`,
-                    dynamic: true
+                    dynamic: true,
                 }),
-            ]
-        })
-    ]
-}
+                // you can also use existing template as entry
+                staticTemplate,
+            ],
+        }),
+    ],
+};
 
 export default config;
