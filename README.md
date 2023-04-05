@@ -17,7 +17,7 @@ yarn global add pli
 ```shell
 npm install pli 
 # or
-yarn add pli
+yarn add pli 
 ```
 
 You can use it also via npx
@@ -26,12 +26,21 @@ You can use it also via npx
 npx pli
 ```
 
-## Usage
+# Usage
 
 init pli in current directory
 
 ```shell
+# by default pli init will produce templates directory with sample template file
 pli init
+
+# config file is optional, but if you want to create
+# more complex templates it may be useful
+# to generate it run
+pli init -c
+
+# by default pli init will produce typescript config file and examples, if you prefer js use
+pli init -c -t false
 ```
 
 the above command creates `templates` directory and sample template file in it, 
