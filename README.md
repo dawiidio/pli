@@ -9,21 +9,21 @@ create CLI for any project within a few minutes with **pli** and keep it along w
 Global installation is recommended
 
 ```shell
-npm install -g pli 
+npm install -g @dawiidio/pli 
 # or 
-yarn global add pli
+yarn global add @dawiidio/pli
 ```
 
 ```shell
-npm install pli 
+npm install @dawiidio/pli 
 # or
-yarn add pli 
+yarn add @dawiidio/pli 
 ```
 
 You can use it also via npx
 
 ```shell
-npx pli
+npx @dawiidio/pli
 ```
 
 # Usage
