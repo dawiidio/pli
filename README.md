@@ -1,230 +1,320 @@
-# @dawiidio/rss 
+# pli
 
-Small library for quick rss endpoints development. It's just a
-syntax sugar for a few standards: raw `RSS2`, `Apple podcast` and `Spotify podcast`.
+![pli logo](https://github.com/dawiidio/pli/blob/main/static/logo.jpg?raw=true)
 
-Below mobile view generated from builtin `html` renderer
+create CLI for any project within a few minutes with **pli** and keep it along with your project!
 
-![Mobile view](https://github.com/dawiidio/rss/blob/main/static/mobile.png?raw=true)
+## Installation
 
-### Installation
+Global installation is recommended
 
 ```shell
-yarn add @dawiidio/rss
+npm install -g pli 
+# or 
+yarn global add pli
+```
+
+```shell
+npm install pli 
 # or
-npm install @dawiidio/rss
+yarn add pli
+```
+
+You can use it also via npx
+
+```shell
+npx pli
 ```
 
 ## Usage
 
-Basic example
+init pli in current directory
 
-```typescript
-import { createRssChannel, IChannelProps, createRendererForChannel, getRenderer } from '@dawiidio/rss'; 
-
-const channel: IChannelProps = {
-    title: 'My podcast',
-    description: 'I will talk about unicorns and magic beasts',
-    link: 'https://mypage.xyz/podcast',
-    items: [
-        {
-            title: 'How I meet unicorn',
-            description: 'Story about how I meet <strong>unicorn</strong> for the first time!',
-            link: 'https://mypage.xyz/podcast/unicorn-story'
-        },
-    ]
-};
-
-const renderer = createRendererForChannel(getRenderer('xml'), channel);
-
-console.log(renderer.render());
+```shell
+pli init
 ```
 
-Basic podcast example (raw xml, see itunes below)
+the above command creates `templates` directory and sample template file in it, 
+which looks like this:
 
-```typescript
-import { 
-    createRssChannel, 
-    IChannelProps,
-    createRendererForChannel,
-    getRenderer,
-    parseToRSSDateFormat,
-    megabytesToBytes
-} from '@dawiidio/rss';
-
-const channel: IChannelProps = {
-    title: 'My podcast',
-    description: 'I will talk about unicorns and magic beasts',
-    link: 'https://magicbeasts.xyz/podcast',
-    language: 'en-US',
-    image: {
-        url: 'https://magicbeasts.xyz/public/podcast-cover.jpg',
-        title: 'Podcast cover',
-        link: 'https://magicbeasts.xyz/podcast'
-    },
-    items: [
-        {
-            title: 'How I meet unicorn',
-            description: 'Story about how I meet <strong>unicorn</strong> for the first time!',
-            link: 'https://magicbeasts.xyz/podcast/unicorn-story',
-            author: {
-                name: 'John Doe',
-                email: 'john@magicbeasts.xyz'
-            },
-            enclosure: {
-                url: 'https://magicbeasts.xyz/public/unicorn-story.mp3',
-                type: 'audio/mp3',
-                length: megabytesToBytes(86) // file size in bytes
-            },
-            pubDate: parseToRSSDateFormat('21.02.2023')
-        },
-    ]
-};
-
-const renderer = createRendererForChannel(getRenderer('xml'), channel);
-
-console.log(renderer.render());
+```javascript
+export function hello() {
+    return 'Hello $NAME$';
+}
 ```
 
-Since Spotify and Apple are using additional tags for podcasts you can specify them
-in `overrides` field available on channel and item (episode) level.
+as you can see we have `$NAME$` which defines pli's variable. This variable will
+be extracted and prompted to fill with value after selecting template, 
+you can now run `pli` command in current directory, pli will prompt you with below message: 
 
-```typescript
-import { 
-    createRssChannel,
-    IChannelProps,
-    createRendererForChannel,
-    getRenderer,
-    megabytesToBytes,
-    parseHMSToSeconds
-} from '@dawiidio/rss';
-
-const channel: IChannelProps = {
-    title: 'My podcast',
-    description: 'I will talk about unicorns and magic beasts',
-    link: 'https://magicbeasts.xyz/podcast',
-    language: 'en-US',
-    image: {
-        url: 'https://magicbeasts.xyz/public/podcast-cover.jpg',
-        title: 'Podcast cover',
-        link: 'https://magicbeasts.xyz/podcast'
-    },
-    items: [
-        {
-            title: 'How I meet unicorn',
-            description: 'Story about how I meet <strong>unicorn</strong> for the first time!',
-            link: 'https://magicbeasts.xyz/podcast/unicorn-story',
-            author: {
-                name: 'John Doe',
-                email: 'john@magicbeasts.xyz'
-            },
-            enclosure: {
-                url: 'https://magicbeasts.xyz/public/unicorn-story.mp3',
-                type: 'audio/mp3',
-                length: megabytesToBytes(125.5) // file size in bytes
-            },
-            overrides: {
-                itunes: {
-                    image: 'https://magicbeasts.xyz/public/unicorn-story-cover.jpg',
-                    duration: parseHMSToSeconds('1:23:05')
-                }
-            }
-        },
-    ],
-    overrides: {
-        itunes: {
-            title: 'This is a specific title only for Apple Podcast'
-        }
-    }
-};
-
-const renderer = createRendererForChannel(getRenderer('xml:itunes'), channel);
-
-console.log(renderer.render());
+```text
+? Select template (Use arrow keys)
+❯ hello.js 
 ```
 
-## Ui renderer
-HTML renderer is also included by default in library, there are two methods to render html for rss,
+select template `hello.js` by pressing enter
 
-first, simple with default settings
-```typescript
-import { HtmlRss2Renderer, createRssChannel, IChannelProps, createRendererForChannel, getRenderer } from '@dawiidio/rss';
-import css from '@dawiidio/rss/lib/styles.css'; // contains styles for default html renderer, should be added to bundle 
-
-const renderer = createRendererForChannel(
-    getRenderer('html'),
-    channel
-);
+```text
+? Select template hello.js
+? Output directory  <-- type directory where file should be saved or leave it empty to save in current
+? Insert value for NAME :  <-- type value for name, e.g. David
 ```
 
-second, with options 
-```typescript
-import { HtmlRss2Renderer, createRssChannel, IChannelProps, createRendererForChannel, getRenderer } from '@dawiidio/rss';
+when last variable is filled with value pli starts its magic and produces result file,
+after successful creation process you will see summary like below:
 
-const renderer = createRendererForChannel(
-    new HtmlRss2Renderer({ cssClassPrefix: 'my prefix' }),
-    channel
-);
+```text
+Following structure was created inside directory /your/current/working/directory
+├─ hello.js
 ```
 
-`UiRenderer` also has different api than base renderer
+That's it! You can see the results by opening file. For example
 
-```typescript
-import { HtmlRss2Renderer, createRssChannel, IChannelProps, createRendererForChannel, getRenderer } from '@dawiidio/rss';
-
-const renderer = createRendererForChannel(
-    new HtmlRss2Renderer({ 
-        cssClassPrefix: 'my-prefix-',
-        trimEpisodeDescInListTo: 200
-    }),
-    channel
-);
-
-console.log(renderer.renderEpisodePage('episode guid')); // renders html for single item/episode
-console.log(renderer.renderChannelPage({
-    getPaginationUrl: (page, active) => `https://dawiid.io/podcast/${page}`,
-    itemsPerPage: 20,
-    offset: 0,
-    activeItem: 0,
-})); // renders page with list of items/episodes and pagination
+```shell
+cat hello.js
 ```
 
-### Default HTML renderer views
+should return
 
-Default html renderer contains below views
+```javascript
+export function hello() {
+    return 'Hello David';
+}
+```
 
-#### Episodes list
-![Episodes list](https://github.com/dawiidio/rss/blob/main/static/list.png?raw=true)
+# cli
 
-#### Single episode view
-![Episode preview](https://github.com/dawiidio/rss/blob/main/static/episode.png?raw=true)
+```shell
 
-All views are responsive.
+```
 
+# Examples
 
-## Custom renderers
-You can add your own renderers by extending after `Renderer` class or `UiRenderer`.
+The above example is just the simplest one, you can create more sophisticated
+templates with many directories, variables and files. For examples see [https://github.com/dawiidio/pli/examples](https://github.com/dawiidio/pli/examples)
 
-Differences between `Renderer` and `UiRenderer`:
-- `Renderer` is for formats not needing visual representation (like `xml` or `json`) because they are read by machines 
-- `UiRenderer` is for visual representation formats like `html`
+# Config file
 
-For sample implementations look in `src/renderer/xml` and `src/renderer/html` folders
+to create more powerful tools and templates the config file may be needed, run
 
-```typescript
-import { createRssChannel, Renderer } from '@dawiidio/rss';
+```shell
+# for typescript config file run
+pli init -c -t
+# for javascript config file run
+pli init -c
+```
 
-class MyRenderer extends Renderer {
-    // ...
+the above command creates `pli.config.js` or `pli.config.ts` file in current directory,
+now this is the time to create more complex templates, we will create a React 
+component template with support for css modules.
+
+run
+
+```shell
+mkdir templates/$NAME$
+touch templates/$NAME$/$NAME$.tsx 
+touch templates/$NAME$/$NAME$.module.css
+```
+
+in `templates/$NAME$/$NAME$.tsx` file add
+
+```tsx
+import React, { FunctionComponent } from "react";
+import styles from './$NAME$.module.css';
+
+interface $NAME$Props {
+
 }
 
-const renderer = createRendererForChannel(new MyRenderer(), channel);
+export const $NAME$:FunctionComponent<$NAME$Props> = ({  }) => {
 
-console.log(renderer.render());
+    return (
+        <div className={styles.$NAME$Root}>
+            Component $NAME$
+        </>
+    )
+};
 ```
 
-### Sources
-- [Apple podcaster's guide to RSS](https://help.apple.com/itc/podcasts_connect/#/itcb54353390)
-- [Raw RSS2 standard](https://validator.w3.org/feed/docs/rss2.html)
-- [Spotify's resources for podcasters](https://support.spotifyforpodcasters.com/hc/en-us)
-- [Apple's support post about podcast rss](https://podcasters.apple.com/support/823-podcast-requirements)
+now we have a template for React component, but we want to have 
+support for css modules, so we need to add css file for it. 
+
+in `templates/$NAME$/$NAME$.module.css` file add
+
+```css
+.$NAME$Root {
+
+}
+```
+
+now we have a template files for React component with css module support, 
+and it will work just fine now, but we can make it even better.
+
+in `pli.config.ts` file add
+
+```typescript
+import { Template, IConfig, TemplateVariable } from '@dawiidio/pli';
+
+const config: IConfig = {
+    templates: [
+        new Template({
+            // readable name, instead of "$NAME$" you will see "React Component" in cli
+            name: 'React Component', 
+            // if you want to extend from exisitn template in templates directory you need to provide its name
+            id: '$NAME$',
+            // all will be generated relative to myDir directory
+            defaultOutputDirectoryPath: 'src/components',
+            variables: [
+                new TemplateVariable({
+                    // variable name, it will be replaced with value in template files
+                    name: 'NAME',
+                    // you can pass default value for our variable
+                    defaultValue: 'MyComponent',
+                    // let's add some validation for our variable
+                    validate: (value: string) => {
+                        if (value.length < 3) {
+                            throw new Error('Name must be at least 3 characters long');
+                        }
+                    }
+                }),
+                new TemplateVariable({
+                    // variable name, it will be replaced with value in template files
+                    name: 'DIRNAME',
+                    // this variable will subscribe from NAME variable, so it will be updated when NAME is updated
+                    defaultValue: '$NAME$',
+                    ui: {
+                        // you can also hide variables from user, so it will be used only for internal purposes
+                        hidden: true
+                    }
+                }).pipe(
+                    // you can pipe variable value and trnasform it as you want, 
+                    // in this case we will replace all spaces with dashes
+                    // and then we will convert all letters to lowercase
+                    // so if we type "My Component" as NAME variable value
+                    // DIRNAME will be "my-component"
+                    (value: string) => value.replace(/\s/g, '-').toLowerCase()
+                )
+            ],
+        })
+    ]
+}
+
+export default config;
+```
+
+after adding config file we can run `pli`, if you set `$NAME$` to e.g. `TestFilters` you will see below message:
+
+```text
+Following structure was created inside directory /myProject/src/components
+├─ TestFilters/
+│  ├─ TestFilters.module.css
+│  ├─ TestFilters.tsx
+
+```
+
+### Variables
+
+You can create variables in your templates by using notation with dollars `$MY_VAR$`.
+Variable name is case-sensitive, so `$my_var$` and `$MY_VAR$` are different variables.
+Variable name can contain only letters, numbers and underscores.
+
+Variables can be used in any file, or directory name,
+or in other variable `defaultValue` field which means that variable will
+subscribe to changes of variables passed in `defaultValue`.
+You can use variables also in `outputMapping` in template config.
+
+### Scopes
+
+Variables are organised in scopes, so you can have variables with the same name
+in different scopes. It is useful when you want to access variables from different
+template. For example if you want to add template as an entry to another template
+you can use variables from parent template i child. Also, variables from child
+will be extracted and prompted to fill with value when selecting parent template.
+
+Example:
+
+```typescript
+import { Template, IConfig, TemplateVariable } from '@dawiidio/pli';
+
+const childTemplate = new Template({
+    name: 'Child',
+    id: 'child.ts',
+    variables: [
+        new TemplateVariable({
+            name: 'CHILD_VAR',
+            defaultValue: 'child'
+        })
+    ]
+});
+
+// parent template will prompt for PARENT_VAR and CHILD_VAR
+const parentTemplate = new Template({
+    name: 'Parent',
+    id: 'parent.ts',
+    variables: [
+        new TemplateVariable({
+            name: 'PARENT_VAR',
+            defaultValue: 'parent'
+        }),
+    ],
+    entries: [
+        childTemplate
+    ]
+});
+
+const config: IConfig = {
+    templates: [
+        parentTemplate,
+    ]
+}
+
+export default config;
+```
+
+### Output mapping
+
+You can map output of template which allows you to create more complex templates,
+for example you can create template which will remap child template output to
+different directory or filename.
+
+```typescript
+import { Template, IConfig, TemplateVariable } from '@dawiidio/pli';
+
+const childTemplate = new Template({
+    name: 'Child',
+    id: 'child.ts',
+    variables: [
+        new TemplateVariable({
+            name: 'CHILD_VAR',
+            defaultValue: 'child'
+        })
+    ]
+});
+
+const parentTemplate = new Template({
+    name: 'Parent',
+    id: 'parent.ts',
+    variables: [
+        new TemplateVariable({
+            name: 'PARENT_VAR',
+            defaultValue: 'parent'
+        }),
+    ],
+    entries: [
+        childTemplate
+    ],
+    outputMapping: {
+        // note thath you can not use CHILD_VAR in this scope
+        'child.ts': '$PARENT_VAR$.ts',
+        'parent.ts': '$PARENT_VAR$_somePostfix.ts',
+    }
+});
+
+const config: IConfig = {
+    templates: [
+        parentTemplate,
+    ]
+}
+
+export default config;
+```

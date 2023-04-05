@@ -5,8 +5,7 @@ import { IStorage } from '~/storage/IStorage';
 import { VariableScope } from '~/variableScope/VariableScope';
 import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
 
-export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] };
-export type WithOptional<T, K extends keyof T> = Omit<T, K> & { [P in K]?: T[P] };
+export type { WithRequired, WithOptional } from '@dawiidio/tools';
 
 export const PARENT_EVENTS_PREFIX = 'parent:';
 

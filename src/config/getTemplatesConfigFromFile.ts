@@ -1,21 +1,13 @@
-import { extname, resolve } from 'path';
-import { IConfig, IFullConfig } from '~/config/IConfig';
-import { IStorage } from '~/storage/IStorage';
-import { exec } from 'node:child_process';
+import {extname, resolve} from 'path';
+import {IConfig, IFullConfig} from '~/config/IConfig';
+import {IStorage} from '~/storage/IStorage';
+import {exec} from 'node:child_process';
 import * as process from 'process';
-import {
-    assertAndExit,
-    CACHE_DIRNAME,
-    DEFAULT_CONFIG_FILENAME,
-    DEFAULT_TEMPLATES_DIRNAME,
-    exitWithError,
-} from '~/common';
-import { createHash } from 'crypto';
-import { Template } from '~/template/Template';
+import {assertAndExit, CACHE_DIRNAME, DEFAULT_CONFIG_FILENAME, exitWithError,} from '~/common';
+import {createHash} from 'crypto';
 
 const DEFAULT_CONFIG: IFullConfig = {
     templates: [],
-    templatesDir: DEFAULT_TEMPLATES_DIRNAME,
 };
 
 interface ICompileTsSettings {
@@ -27,7 +19,7 @@ interface ICompileTsSettings {
     rootDir: string;
 }
 
-const getCompileCommand = ({ templatesConfigPath, outDir, rootDir }: ICompileTsSettings): string => {
+const getCompileCommand = ({templatesConfigPath, outDir, rootDir}: ICompileTsSettings): string => {
     return `tsc ${templatesConfigPath} --outDir ${outDir} --rootDir ${rootDir} --declaration false --module nodenext --skipDefaultLibCheck true`;
 };
 
@@ -114,7 +106,7 @@ export const runTsTemplatesConfigFile = async (
 
         });
     }
-    const { default: config } = await import(storage.join(tsOutputDir, `${DEFAULT_CONFIG_FILENAME}.js`));
+    const {default: config} = await import(storage.join(tsOutputDir, `${DEFAULT_CONFIG_FILENAME}.js`));
 
     assertAndExit(config, `Config in ${DEFAULT_CONFIG_FILENAME}.ts must be exported as default`);
 

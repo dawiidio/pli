@@ -6,7 +6,7 @@ import { getTemplatesConfigFromFile } from '~/config/getTemplatesConfigFromFile'
 import { mergeRootConfigTemplatesWithExtractedTemplates } from '~/config/mergeRootConfigTemplatesWithExtractedTemplates';
 import { extractTemplatesFromDirectory } from '~/config/extractTemplatesFromDirectory';
 import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
-import { assertAndExit, CACHE_DIRNAME, createTreeFromPaths, BuiltinVariables } from '~/common';
+import {assertAndExit, CACHE_DIRNAME, createTreeFromPaths, BuiltinVariables, DEFAULT_TEMPLATES_DIRNAME} from '~/common';
 import { cwd } from 'node:process';
 import { saveRenderOutputToStorage } from '~/template/saveRenderOutputToStorage';
 import { searchForConfigFile } from '~/config/searchForConfigFile';
@@ -27,14 +27,16 @@ async function main() {
         ? storage.resolve(cliConfig.config)
         : (await searchForConfigFile(storage, cwdPath));
 
-    assertAndExit<string>(templatesConfigFilePath, 'No config file found');
-
+    const templatesDirPath = cliConfig.templatesDirectory || DEFAULT_TEMPLATES_DIRNAME;
+    const extractedTemplates = await extractTemplatesFromDirectory(templatesDirPath, storage);
     const templateEngine = getTemplateEngine();
+
+    assertAndExit<string>(templatesConfigFilePath, 'No config file found. Run "pli init" to initialize pli in current directory');
+
     const userConfig = await getTemplatesConfigFromFile(templatesConfigFilePath, storage, {
         cacheDir: storage.resolve(CACHE_DIRNAME),
     });
-    const templatesDirPath = cliConfig.templatesDirectory || storage.join(cwdPath, userConfig.templatesDir);
-    const extractedTemplates = await extractTemplatesFromDirectory(templatesDirPath, storage);
+
     const mergedRootTemplates = mergeRootConfigTemplatesWithExtractedTemplates(extractedTemplates, userConfig.templates);
     await fetchTemplateEntriesContent(mergedRootTemplates, storage);
 

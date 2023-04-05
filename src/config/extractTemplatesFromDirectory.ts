@@ -10,7 +10,7 @@ export const extractTemplatesFromDirectory = async (templatesPath: string, stora
     try {
         await storage.access(templatesPath);
     } catch {
-        exitWithError(`Templates directory ${templatesPath} not found`);
+        exitWithError(`Templates directory ${templatesPath} not found. Run 'pli init' to create it.`);
     }
 
     const paths = await storage.readDir(templatesPath);
