@@ -7,6 +7,8 @@ const config: IConfig = {
         new Template({
             name: 'My readable name for template',
             id: '$NAME$.ts',
+            // all will be generated relative to myDir directory
+            defaultOutputDirectoryPath: 'myDir',
             variables: [
                 new TemplateVariable({
                     name: 'RETURN_TEXT',

@@ -1,6 +1,7 @@
 import { LazyPipe } from '@dawiidio/tools';
 import { ITemplateVariable, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable';
 import { IVariableScope } from '~/variableScope/IVariableScope';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
 
 export interface IVariableProps<T = any> {
     name: string,
@@ -35,7 +36,9 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
     public overridable: boolean;
 
     public readonly: boolean;
+
     private value: T | undefined = undefined;
+
     private lazyPipe = new LazyPipe<T>();
 
     constructor({
@@ -119,5 +122,9 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
 
     clone(): ITemplateVariable<T> {
         return this.merge(this);
+    }
+
+    getDependencies(templateEngine: ITemplateEngine): string[] {
+        return templateEngine.extractAllVariables(String(this.defaultValue || ''));
     }
 }

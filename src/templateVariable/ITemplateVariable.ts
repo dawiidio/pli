@@ -1,4 +1,5 @@
 import { IVariableScope } from '~/variableScope/IVariableScope';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
 
 export type IVariableUiType = 'input' |
     'number' |
@@ -52,4 +53,6 @@ export interface ITemplateVariable<T = any> {
     transformValue(value: any): T;
 
     clone(): ITemplateVariable<T>;
+
+    getDependencies(templateEngine: ITemplateEngine): string[];
 }

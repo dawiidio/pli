@@ -5,6 +5,8 @@ import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
 import { IVariableScope } from '~/variableScope/IVariableScope';
 import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
 import { assert } from '@dawiidio/tools';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
+import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
 
 type Client = typeof inquirer;
 
@@ -12,12 +14,14 @@ interface ITemplateSelection {
     selectedTemplateId: string;
 }
 
+const VARIABLE_SORT_INDEX_STEP = 10;
+
 export class TerminalCliRenderer implements ICliRenderer {
     protected client: Client | undefined = inquirer;
 
     public selectedTemplate: ITemplate | undefined;
 
-    constructor(protected templateTreeRenderer: TemplateTreeRenderer) {}
+    constructor(protected templateTreeRenderer: TemplateTreeRenderer, protected templateEngine: ITemplateEngine = getTemplateEngine('base')) {}
 
     async runTemplateSelectionUi(): Promise<ITemplate> {
         const {
@@ -48,12 +52,11 @@ export class TerminalCliRenderer implements ICliRenderer {
     }
 
     protected createClientUiForVariableScope<T extends Answers = Answers>(ctx: IVariableScope): QuestionCollection<T> {
+        this.updateIndexes(ctx);
+
         return ctx.collectAllBranchVariables()
             .filter((variable) => !variable.ui.hidden)
-            .sort((variableA, variableB) => {
-                //todo check sorting
-                return variableA.index - variableB.index;
-            })
+            .sort((variableA, variableB) => variableB.index - variableA.index)
             .map<DistinctQuestion<T>>((variable) => this.createClientUiForVariable<T>(variable, ctx));
     }
 
@@ -91,7 +94,23 @@ export class TerminalCliRenderer implements ICliRenderer {
         ];
     }
 
-    protected updateIndexes() {
-        // todo add automatic variable index updating by checking if it subscribes from another variable
+    protected updateIndexes(ctx: IVariableScope) {
+        // todo move this method to variable scope and remove templateEngine from this class
+        // todo variable shouldn't update it's index, it should be context dependent and be kept there - variable is just a config holder
+        for (const variable of ctx.collectAllBranchVariables()) {
+            const dependencies = variable.getDependencies(this.templateEngine);
+
+            variable.index += dependencies.length * (-VARIABLE_SORT_INDEX_STEP);
+
+            dependencies.forEach((variableName) => {
+                try {
+                    const variable = ctx.getVariableFromTop(variableName);
+                    variable.index += VARIABLE_SORT_INDEX_STEP;
+                }
+                catch (e) {
+                    throw new Error(`Variable "${variableName}" passed in variable's "${variable.name}" defaultValue doesn't exist in current scope. Original message: ${(e as Error).message}`);
+                }
+            });
+        }
     }
 }

@@ -137,6 +137,7 @@ export class Template implements ITemplate {
             new TemplateVariable({
                 name: BuiltinVariables.CWD,
                 defaultValue: scopeCwd,
+                index: 1000,
                 ui: {
                     message: `Output directory`,
                 },

@@ -14,7 +14,6 @@ import { fetchTemplateEntriesContent } from '~/config/fetchTemplateEntriesConten
 import { getRootCliConfig } from '~/config/getRootCliConfig';
 import { ITemplate } from '~/template/ITemplate';
 
-// todo examples
 async function main() {
     const cliConfig = await getRootCliConfig();
 
