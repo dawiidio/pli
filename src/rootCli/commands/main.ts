@@ -1,18 +1,12 @@
 import { getStorage } from '~/storage/getStorage';
 import { cwd } from 'node:process';
 import { searchForConfigFile } from '~/config/searchForConfigFile';
-import {
-    assertAndExit,
-    BuiltinVariables,
-    CACHE_DIRNAME,
-    createTreeFromPaths,
-    DEFAULT_TEMPLATES_DIRNAME,
-} from '~/common';
+import { BuiltinVariables, CACHE_DIRNAME, createTreeFromPaths, DEFAULT_TEMPLATES_DIRNAME } from '~/common';
 import { extractTemplatesFromDirectory } from '~/config/extractTemplatesFromDirectory';
 import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
 import { getTemplatesConfigFromFile } from '~/config/getTemplatesConfigFromFile';
 import {
-    mergeRootConfigTemplatesWithExtractedTemplates
+    mergeRootConfigTemplatesWithExtractedTemplates,
 } from '~/config/mergeRootConfigTemplatesWithExtractedTemplates';
 import { fetchTemplateEntriesContent } from '~/config/fetchTemplateEntriesContent';
 import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
@@ -20,6 +14,7 @@ import { getCliRenderer } from '~/cliRenderer/getCliRenderer';
 import { ITemplate } from '~/template/ITemplate';
 import { saveRenderOutputToStorage } from '~/template/saveRenderOutputToStorage';
 import { IMainCommandOptions } from '~/rootCli/IMainCommandOptions';
+import { IFullConfig } from '~/config/IConfig';
 
 export async function main(cliConfig: IMainCommandOptions) {
     if (cliConfig.dry) {
@@ -36,11 +31,15 @@ export async function main(cliConfig: IMainCommandOptions) {
     const extractedTemplates = await extractTemplatesFromDirectory(templatesDirPath, storage);
     const templateEngine = getTemplateEngine();
 
-    assertAndExit<string>(templatesConfigFilePath, 'No config file found. Run "pli init" to initialize pli in current directory');
+    let userConfig: IFullConfig = {
+        templates: [],
+    };
 
-    const userConfig = await getTemplatesConfigFromFile(templatesConfigFilePath, storage, {
-        cacheDir: storage.resolve(CACHE_DIRNAME),
-    });
+    if (templatesConfigFilePath) {
+        userConfig = await getTemplatesConfigFromFile(templatesConfigFilePath, storage, {
+            cacheDir: storage.resolve(CACHE_DIRNAME),
+        });
+    }
 
     const mergedRootTemplates = mergeRootConfigTemplatesWithExtractedTemplates(extractedTemplates, userConfig.templates);
     await fetchTemplateEntriesContent(mergedRootTemplates, storage);
