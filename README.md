@@ -4,7 +4,9 @@
 
 create CLI for any project within a few minutes with **pli** and keep it along with your project!
 
-## Installation
+## Installation and usage
+
+![pli-terminal-gif](https://github.com/dawiidio/pli/blob/main/static/pli-terminal.gif?raw=true)
 
 Global installation is recommended
 
@@ -26,7 +28,7 @@ You can use it also via npx
 npx @dawiidio/pli
 ```
 
-# Usage
+## Usage
 
 init pli in current directory
 
