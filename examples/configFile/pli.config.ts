@@ -1,6 +1,4 @@
-import { Template } from '../../lib/exports';
-import { IConfig } from '../../lib/exports';
-import { TemplateVariable } from '../../lib/exports';
+import { IConfig, ITemplateVariable, IVariableScope, Template, TemplateVariable } from '@dawiidio/pli';
 
 const config: IConfig = {
     templates: [

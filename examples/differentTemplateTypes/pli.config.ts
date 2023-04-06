@@ -1,4 +1,4 @@
-import { IConfig, Template, TemplateEntry, TemplateVariable } from '../../lib/exports';
+import { IConfig, ITemplateVariable, IVariableScope, Template, TemplateVariable } from '@dawiidio/pli';
 
 // when you have template file but you want to change or add some variables
 const staticTemplate = new Template({

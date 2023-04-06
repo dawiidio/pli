@@ -1,4 +1,4 @@
-import { IConfig, ITemplateVariable, IVariableScope, Template, TemplateVariable } from '../../lib/exports';
+import { IConfig, ITemplateVariable, IVariableScope, Template, TemplateVariable } from '@dawiidio/pli';
 
 const variable = new TemplateVariable({
     name: 'VALUE',
