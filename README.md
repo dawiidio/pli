@@ -171,9 +171,9 @@ const config: IConfig = {
         new Template({
             // readable name, instead of "$NAME$" you will see "React Component" in cli
             name: 'React Component', 
-            // if you want to extend from exisitn template in templates directory you need to provide its name
+            // if you want to extend from existing template in templates directory you need to provide its name
             id: '$NAME$',
-            // all will be generated relative to myDir directory
+            // all will be generated relative to src/components directory
             defaultOutputDirectoryPath: 'src/components',
             variables: [
                 new TemplateVariable({
