@@ -2,7 +2,7 @@
 
 <img src="https://github.com/dawiidio/pli/blob/main/static/logo.jpg?raw=true" width="500" height="500" style='margin: auto;display: block;'>
 
-create CLI for any project within a few minutes with **pli** and keep it along with your project!
+create CLI for any project within a few minutes with **Pli**!
 
 ## Installation and usage
 
