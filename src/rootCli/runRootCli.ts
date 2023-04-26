@@ -57,7 +57,7 @@ export const runRootCli = (): void => {
                     description: 'create config file',
                     default: false,
                 })
-                .option('typescript', {
+                .option('type', {
                     alias: 't',
                     type: 'string',
                     default: 'ts',

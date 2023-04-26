@@ -8,7 +8,7 @@
 
 ### Changed
 - working defaultOutputDirectoryPath in Template props, now it is set as value for CWD variable in root scope
-- **option `-t` on `pli init` command changed from `boolean` to `string`, now you can pass config file type as one of `js`, `ts` or `mjs`. Default: `ts`**
+- **option `-t (typescript) boolean` on `pli init` command changed to `-t (type) string`, now you can pass config file type as one of `js`, `ts` or `mjs`. Default: `ts`**
 - adjusted default config files for `js` and `ts` types
 
 ### Fixed

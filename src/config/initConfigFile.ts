@@ -33,9 +33,9 @@ exports.default = config;
 `
     },
 mjs: {
-        filename: `${DEFAULT_CONFIG_FILENAME}.js`,
+        filename: `${DEFAULT_CONFIG_FILENAME}.mjs`,
         content:
-`const { Template, TemplateVariable } = require('@dawiidio/pli');
+`import { Template, TemplateVariable } from '@dawiidio/pli';
 
 const config = {
     templates: [
@@ -43,7 +43,7 @@ const config = {
     ],
 };
 
-exports.default = config;
+export default config;
 `
     }
 }

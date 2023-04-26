@@ -20,8 +20,9 @@
     "skipLibCheck": true,
     "removeComments": true,
     "rootDir": "src",
-    "module": "CommonJS",
+    "module": "NodeNext",
+    "moduleResolution": "Node",
     "outDir": "lib",
-    "target": "ES2022",
+    "target": "ES2022"
   }
 }
