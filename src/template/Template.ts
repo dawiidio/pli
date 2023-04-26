@@ -235,17 +235,17 @@ export class Template implements ITemplate {
         if (templateToMergeWith.id !== this.id)
             throw new Error(`You can not merge two templates with different ID's. Current template id: "${this.id}", and template to merge with: "${templateToMergeWith.id}"`);
 
-        const mergedTemplateEntries = mergeArrays<TemplateEntry>(this.templateEntries, templateToMergeWith.templateEntries, {
+        const mergedTemplateEntries = mergeArrays<TemplateEntry>(this.templateEntries, templateToMergeWith.templateEntries || [], {
             merge: (entry1, entry2) => entry1.merge(entry2),
             findIndex: (entry1, entry2) => entry1.source === entry2.source,
         });
 
-        const mergedChildTemplates = mergeArrays<ITemplate>(this.childTemplates, templateToMergeWith.childTemplates, {
+        const mergedChildTemplates = mergeArrays<ITemplate>(this.childTemplates, templateToMergeWith.childTemplates || [], {
             merge: (entry1, entry2) => entry1.merge(entry2),
             findIndex: (entry1, entry2) => entry1.id === entry2.id,
         });
 
-        const mergedVariables = mergeArrays<ITemplateVariable>(this.variables, templateToMergeWith.variables, {
+        const mergedVariables = mergeArrays<ITemplateVariable>(this.variables, templateToMergeWith.variables || [], {
             merge: (entry1, entry2) => entry1.merge(entry2),
             findIndex: (entry1, entry2) => entry1.name === entry2.name,
         });
