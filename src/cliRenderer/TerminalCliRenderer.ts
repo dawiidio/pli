@@ -108,7 +108,7 @@ export class TerminalCliRenderer implements ICliRenderer {
                     variable.index += VARIABLE_SORT_INDEX_STEP;
                 }
                 catch (e) {
-                    throw new Error(`Variable "${variableName}" passed in variable's "${variable.name}" defaultValue doesn't exist in current scope. Original message: ${(e as Error).message}`);
+                    throw new Error(`Variable "${variableName}" passed in variable's "${variable.name}" defaultValue doesn't exist in current branch. Original message: ${(e as Error).message}`);
                 }
             });
         }

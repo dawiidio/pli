@@ -1,10 +1,8 @@
 import { IStorage } from '~/storage/IStorage';
 import { getStorage } from '~/storage/getStorage';
-import { DEFAULT_TEMPLATES_DIRNAME } from '~/common';
+import { DEFAULT_TEMPLATES_DIRNAME, ISupportedFileTypes } from '~/common';
 
-type ISupportedExtensions = 'ts' | 'js';
-
-const INITIAL_TEMPLATES: Record<ISupportedExtensions, { filename: string, content: string }> = {
+const INITIAL_TEMPLATES: Record<ISupportedFileTypes, { filename: string, content: string }> = {
     ts: {
         filename: `hello.ts`,
         content:
@@ -16,14 +14,22 @@ const INITIAL_TEMPLATES: Record<ISupportedExtensions, { filename: string, conten
     js: {
         filename: `hello.js`,
         content:
+`exports.default = function hello() {
+    return 'Hello $NAME$';
+}
+`
+    },
+    mjs: {
+        filename: `hello.mjs`,
+        content:
 `export function hello() {
     return 'Hello $NAME$';
 }
 `
-    }
+    },
 }
 
-export const initTemplatesDirectory = async (path: string, extension: ISupportedExtensions, storage: IStorage = getStorage('fs')): Promise<string> => {
+export const initTemplatesDirectory = async (path: string, extension: ISupportedFileTypes, storage: IStorage = getStorage('fs')): Promise<string> => {
     const {
         filename,
         content,

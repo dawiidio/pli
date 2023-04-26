@@ -10,3 +10,5 @@ dist
 .tmp
 /templates
 test
+yarn.lock
+yarn-error.log

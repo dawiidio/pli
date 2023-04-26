@@ -1,5 +1,6 @@
 import { TemplateVariable } from '~/templateVariable/TemplateVariable';
-import { assert, setObjectPropertyByPath } from '@dawiidio/tools';
+import { assert, ILogLevel, setObjectPropertyByPath } from '@dawiidio/tools';
+import { Logger, LogLevel } from '@dawiidio/tools/lib/node/Logger/Logger';
 import * as process from 'process';
 import { IStorage } from '~/storage/IStorage';
 import { VariableScope } from '~/variableScope/VariableScope';
@@ -13,9 +14,12 @@ export const CACHE_DIRNAME = '.tmp';
 export const DEFAULT_CONFIG_FILENAME = 'pli.config';
 export const DEFAULT_TEMPLATES_DIRNAME = 'templates';
 
-export const DEFAULT_CONFIG_FILENAMES = [
+export type ISupportedFileTypes = 'ts' | 'js' | 'mjs';
+
+export const DEFAULT_CONFIG_FILENAMES: `${typeof DEFAULT_CONFIG_FILENAME}.${ISupportedFileTypes}`[] = [
     `${DEFAULT_CONFIG_FILENAME}.ts`,
     `${DEFAULT_CONFIG_FILENAME}.js`,
+    `${DEFAULT_CONFIG_FILENAME}.mjs`,
 ];
 
 export enum BuiltinVariables {
@@ -110,7 +114,7 @@ export const removeVariableDuplicates = (variables: ITemplateVariable[]): ITempl
         addedVariables.add(variable.name);
         return true;
     });
-}
+};
 
 export const checkForVariableDuplicates = (variables: ITemplateVariable[]): ITemplateVariable[] => {
     const addedVariables = new Set<string>();
@@ -123,4 +127,35 @@ export const checkForVariableDuplicates = (variables: ITemplateVariable[]): ITem
         addedVariables.add(variable.name);
         return variable;
     });
+};
+
+class EnhancedLogger extends Logger {
+
+    error(...args: any[]) {
+        this.log(this.stringifyArgs(args), {
+            logLevel: LogLevel.error,
+        });
+    }
+
+    debug(...args: any[]) {
+        this.log(this.stringifyArgs(args));
+    }
+
+    warn(...args: any[]) {
+        this.log(this.stringifyArgs(args), {
+            logLevel: LogLevel.warn,
+        });
+    }
+
+    info(...args: any[]) {
+        this.log(this.stringifyArgs(args), {
+            logLevel: LogLevel.info,
+        });
+    }
+
+    private stringifyArgs(args: any[]): string {
+        return args.map((val) => JSON.stringify(val).replaceAll('"', '')).join(' ');
+    }
 }
+
+export const logger = new EnhancedLogger();

@@ -1,10 +1,9 @@
 import { IStorage } from '~/storage/IStorage';
 import { getStorage } from '~/storage/getStorage';
-import { DEFAULT_CONFIG_FILENAME } from '~/common';
+import { DEFAULT_CONFIG_FILENAME, ISupportedFileTypes } from '~/common';
 
-type ISupportedExtensions = 'ts' | 'js';
 
-const INITIAL_TEMPLATES: Record<ISupportedExtensions, { filename: string, content: string }> = {
+const INITIAL_TEMPLATES: Record<ISupportedFileTypes, { filename: string, content: string }> = {
     ts: {
         filename: `${DEFAULT_CONFIG_FILENAME}.ts`,
         content:
@@ -22,7 +21,7 @@ export default config;
     js: {
         filename: `${DEFAULT_CONFIG_FILENAME}.js`,
         content:
-`import { Template, TemplateVariable } from '@dawiidio/pli';
+`const { Template, TemplateVariable } = require('@dawiidio/pli');
 
 const config = {
     templates: [
@@ -30,16 +29,30 @@ const config = {
     ],
 };
 
-export default config;
+exports.default = config;
+`
+    },
+mjs: {
+        filename: `${DEFAULT_CONFIG_FILENAME}.js`,
+        content:
+`const { Template, TemplateVariable } = require('@dawiidio/pli');
+
+const config = {
+    templates: [
+        
+    ],
+};
+
+exports.default = config;
 `
     }
 }
 
-export const initConfigFile = async (path: string, extension: ISupportedExtensions, storage: IStorage = getStorage('fs')): Promise<string> => {
+export const initConfigFile = async (path: string, type: ISupportedFileTypes, storage: IStorage = getStorage('fs')): Promise<string> => {
     const {
         filename,
         content,
-    } = INITIAL_TEMPLATES[extension];
+    } = INITIAL_TEMPLATES[type];
     const fullPath = storage.join(path, filename);
 
     try {

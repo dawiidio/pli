@@ -70,7 +70,7 @@
     }
   },
   "dependencies": {
-    "@dawiidio/tools": "0.4.0",
+    "@dawiidio/tools": "0.7.2",
     "@types/inquirer": "^9.0.3",
     "commander": "^10.0.0",
     "inquirer": "^8.2.5",

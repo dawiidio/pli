@@ -12,6 +12,8 @@ export interface IVariableChangeEvent {
 export interface IVariableScope extends EventEmitter {
     readonly id: string;
 
+    parent: IVariableScope | undefined;
+
     children: Set<IVariableScope>;
 
     spawnChild(): IVariableScope;
@@ -32,7 +34,7 @@ export interface IVariableScope extends EventEmitter {
 
     collectAllBranchVariablesValues<T extends Record<string, any> = Record<string, any>>(): T;
 
-    collectAllBranchVariables(): ITemplateVariable[];
+    collectAllBranchVariables(variablesAcc?: ITemplateVariable[]): ITemplateVariable[];
 
     setVariableValueFromTop<T = any>(name: string, value: T): void;
 

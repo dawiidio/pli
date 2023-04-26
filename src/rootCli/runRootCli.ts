@@ -26,6 +26,12 @@ export const runRootCli = (): void => {
                     type: 'boolean',
                     description: 'dry run, results will not be saved',
                 })
+                .option('logLevel', {
+                    alias: 'l',
+                    type: 'string',
+                    default: 'error',
+                    description: 'log level. Available options: error, warn, info, debug. Multiple options can be provided separated by |',
+                })
                 .option('allowOverwriting', {
                     alias: 'o',
                     type: 'boolean',
@@ -53,9 +59,9 @@ export const runRootCli = (): void => {
                 })
                 .option('typescript', {
                     alias: 't',
-                    type: 'boolean',
-                    description: 'create config file in typescript',
-                    default: true,
+                    type: 'string',
+                    default: 'ts',
+                    description: 'type of config file. Available options: ts, js, mjs',
                 });
         }, async (argv) => {
             await init(argv);

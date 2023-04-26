@@ -37,8 +37,6 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
 
     public readonly: boolean;
 
-    private value: T | undefined = undefined;
-
     private lazyPipe = new LazyPipe<T>();
 
     constructor({
@@ -92,7 +90,6 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
                        lazyPipe,
                        defaultValue,
                        validate,
-                       value,
                    }: TemplateVariable<T>): TemplateVariable<T> {
         const variable = new TemplateVariable<T>({
             name: name || this.name,
@@ -113,7 +110,6 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
             defaultValue: (defaultValue || this.defaultValue) as T,
         });
 
-        variable.value = value || this.value as T;
         // todo merge pipeline transformers
         variable.lazyPipe = lazyPipe;
 

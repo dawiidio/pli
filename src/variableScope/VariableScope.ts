@@ -5,7 +5,7 @@ import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
 import { IVariableChangeEvent, IVariableScope } from '~/variableScope/IVariableScope';
 import { randomUUID } from 'node:crypto';
 import { SubscriptionScope } from '~/variableScope/SubscriptionScope';
-import { BuiltinVariables, PARENT_EVENTS_PREFIX } from '~/common';
+import { logger, PARENT_EVENTS_PREFIX } from '~/common';
 
 
 export class VariableScope extends EventEmitter implements IVariableScope {
@@ -18,12 +18,14 @@ export class VariableScope extends EventEmitter implements IVariableScope {
 
     protected variableValues = new Map<string, any>();
 
+    protected variableDefaultValues = new Map<string, any>();
+
     // todo pass engine in props
     protected templateEngine: ITemplateEngine = getTemplateEngine();
 
     protected subscriptionMiniScopes = new Map<string, SubscriptionScope>();
 
-    constructor(public parent?: VariableScope) {
+    constructor(public parent: VariableScope | undefined = undefined) {
         super();
     }
 
@@ -63,10 +65,11 @@ export class VariableScope extends EventEmitter implements IVariableScope {
         // paths probably should be resolved in tree walker to resolve them relative to parent's cwd
         // so when root cwd is set then all children will keep their relative cwds and at the end they all will
         // be resolved to absolute paths while tree rendering
-        if (this.isRoot() && variable.name === BuiltinVariables.CWD)
-            return;
+        // if (this.isRoot() && variable.name === BuiltinVariables.CWD)
+        //     return;
 
         this.variableValues.set(name, defaultValue);
+        this.variableDefaultValues.set(name, defaultValue);
         this.trigger(`${name}:change`, {
             variable,
             transformedValue: defaultValue,
@@ -174,20 +177,28 @@ export class VariableScope extends EventEmitter implements IVariableScope {
         }, thisScopeVariables as T);
     }
 
-    collectAllBranchVariables(): ITemplateVariable[] {
-        const thisScopeVariables = [...this.variableNameToVariableMap.values()];
+    collectAllBranchVariables(variablesAcc: ITemplateVariable[] = []): ITemplateVariable[] {
+        const alreadyCollectedVariablesNames = variablesAcc.map(v => v.name);
+        const thisScopeVariables = [...this.variableNameToVariableMap.values()]
+            .filter(v => !alreadyCollectedVariablesNames.includes(v.name));
 
-        return [...this.children.values()].reduce((acc, scope) => ([
+        const allCollected = [...variablesAcc, ...thisScopeVariables];
+
+        logger.debug('Scope', this.id, 'collected vars >>>', thisScopeVariables.map(v => v.name), 'isRoot:', this.isRoot());
+
+        const mergedVariables = [...this.children.values()].reduce((acc, scope) => ([
             ...acc,
             // copy within, because we don't want to overwrite variables from parent scope
-            ...scope.collectAllBranchVariables(),
+            ...scope.collectAllBranchVariables(allCollected),
         ]), thisScopeVariables);
+
+        logger.debug('Scope', this.id, 'collected merged with children >>>', mergedVariables.map(v => v.name));
+
+        return mergedVariables;
     }
 
     setVariableValueFromTop<T = any>(name: string, value: T) {
         const matches = this.findFirstScopesFromTopWithVariable(name);
-
-        // console.log(name, value, matches);
 
         matches.forEach(match => match.setVariableValue(name, value));
     }
