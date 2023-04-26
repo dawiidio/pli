@@ -42,7 +42,7 @@ pli init
 pli init -c
 
 # by default pli init will produce typescript config file and examples, if you prefer js use
-pli init -c -t false
+pli init -c -t js
 ```
 
 the above command creates `templates` directory and sample template file in it, 
@@ -109,9 +109,9 @@ templates with many directories, variables and files. For examples see [https://
 to create more powerful tools and templates the config file may be needed, run
 
 ```shell
-# for typescript config file run
-pli init -c -t
 # for javascript config file run
+pli init -c -t js
+# for typescript config file run
 pli init -c
 ```
 
