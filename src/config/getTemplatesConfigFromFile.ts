@@ -1,10 +1,10 @@
-import {extname, resolve} from 'path';
-import {IConfig, IFullConfig} from '~/config/IConfig';
-import {IStorage} from '~/storage/IStorage';
-import {exec} from 'node:child_process';
+import { extname, resolve } from 'path';
+import { IConfig, IFullConfig } from '~/config/IConfig';
+import { IStorage } from '~/storage/IStorage';
+import { exec } from 'node:child_process';
 import * as process from 'process';
-import {assertAndExit, CACHE_DIRNAME, DEFAULT_CONFIG_FILENAME, exitWithError,} from '~/common';
-import {createHash} from 'crypto';
+import { assertAndExit, CACHE_DIRNAME, DEFAULT_CONFIG_FILENAME, exitWithError } from '~/common';
+import { createHash } from 'crypto';
 
 const DEFAULT_CONFIG: IFullConfig = {
     templates: [],
@@ -19,12 +19,14 @@ interface ICompileTsSettings {
     rootDir: string;
 }
 
-const getCompileCommand = ({templatesConfigPath, outDir, rootDir}: ICompileTsSettings): string => {
+const getCompileCommand = ({ templatesConfigPath, outDir, rootDir }: ICompileTsSettings): string => {
     return `tsc ${templatesConfigPath} --outDir ${outDir} --rootDir ${rootDir} --declaration false --module nodenext --skipDefaultLibCheck true`;
 };
 
 const compileTs = (storage: IStorage, compileSettings: ICompileTsSettings): Promise<void> => {
     return new Promise((resolve, reject) => {
+        console.log('created process');
+
         const compileProcess = exec(getCompileCommand(compileSettings), {
             cwd: storage.resolve(),
         });
@@ -32,13 +34,18 @@ const compileTs = (storage: IStorage, compileSettings: ICompileTsSettings): Prom
         compileProcess.stderr?.pipe(process.stderr);
         compileProcess.stdout?.pipe(process.stdout);
 
-        compileProcess.on('exit', () => {
+        compileProcess.on('exit', (val) => {
+            console.log('in exit', val);
+
             compileProcess.stdout?.unpipe(process.stdout);
             compileProcess.stderr?.unpipe(process.stderr);
             resolve();
         });
 
-        compileProcess.on('error', reject);
+        compileProcess.on('error', () => {
+            console.log('heeere');
+            reject();
+        });
     });
 };
 
@@ -60,8 +67,7 @@ const checkIfConfigFileChangedAndReturnNewHash = async (storage: IStorage, curre
     } catch {
     }
 
-    const currentConfigContent = await storage.read(currentConfigFilePath);
-    const currentConfigHash = getHash(currentConfigContent);
+    const currentConfigHash = getHash(await storage.read(currentConfigFilePath));
 
     return (currentConfigHash === prevHash) ? false : currentConfigHash;
 };
@@ -88,6 +94,8 @@ export const runTsTemplatesConfigFile = async (
 
     const newHash = await checkIfConfigFileChangedAndReturnNewHash(storage, pathToTemplatesConfig, cacheDir);
 
+    const pathToCompiledConfig = storage.join(tsOutputDir, DEFAULT_CONFIG_FILENAME);
+
     if (newHash) {
         console.log('\x1b[35m%s\x1b[0m', 'Config file changes detected, recompiling...');
 
@@ -103,10 +111,10 @@ export const runTsTemplatesConfigFile = async (
             templatesConfigPath: pathToTemplatesConfig,
             rootDir: '.',
             outDir: tsOutputDir,
-
         });
     }
-    const {default: config} = await import(storage.join(tsOutputDir, `${DEFAULT_CONFIG_FILENAME}.js`));
+
+    const { default: config } = await import(pathToCompiledConfig);
 
     assertAndExit(config, `Config in ${DEFAULT_CONFIG_FILENAME}.ts must be exported as default`);
 

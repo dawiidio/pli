@@ -8,12 +8,12 @@ import { IInitCommandOptions } from '~/rootCli/IMainCommandOptions';
 export async function init(argv: IInitCommandOptions) {
     // todo refactor below function as well as initConfigFile and initTemplatesDirectory because it looks messy
     const storage = getStorage('fs');
-    const ext = argv.typescript ? 'ts' : 'js';
+    const type = argv.type;
     const cwd = process.cwd();
 
     if (argv.config) {
         try {
-            console.log(`Config file created in ${await initConfigFile(cwd, ext, storage)}`);
+            console.log(`Config file created in ${await initConfigFile(cwd, type, storage)}`);
         }
         catch {
             console.log('Config file already exists');
@@ -23,7 +23,7 @@ export async function init(argv: IInitCommandOptions) {
     try {
         await storage.access(storage.join(cwd, DEFAULT_TEMPLATES_DIRNAME));
     } catch (e) {
-        console.log(`Templates directory created in ${await initTemplatesDirectory(cwd, ext, storage)}`);
+        console.log(`Templates directory created in ${await initTemplatesDirectory(cwd, type, storage)}`);
     }
 
     console.log('All set - you are ready to go!');

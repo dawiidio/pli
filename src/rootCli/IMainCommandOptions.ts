@@ -1,3 +1,6 @@
+import { ILoggerConfigString } from '@dawiidio/tools/lib/node/Logger/Logger';
+import { ISupportedFileTypes } from '~/common';
+
 export interface IMainCommandOptions {
     config: string;
 
@@ -6,10 +9,12 @@ export interface IMainCommandOptions {
     allowOverwriting: boolean;
 
     templatesDirectory: string;
+
+    logLevel: ILoggerConfigString;
 }
 
 export interface IInitCommandOptions {
     config: boolean;
 
-    typescript: boolean;
+    type: ISupportedFileTypes;
 }

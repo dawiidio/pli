@@ -1,7 +1,13 @@
 import { getStorage } from '~/storage/getStorage';
 import { cwd } from 'node:process';
 import { searchForConfigFile } from '~/config/searchForConfigFile';
-import { BuiltinVariables, CACHE_DIRNAME, createTreeFromPaths, DEFAULT_TEMPLATES_DIRNAME } from '~/common';
+import {
+    BuiltinVariables,
+    CACHE_DIRNAME,
+    createTreeFromPaths,
+    DEFAULT_TEMPLATES_DIRNAME,
+    logger,
+} from '~/common';
 import { extractTemplatesFromDirectory } from '~/config/extractTemplatesFromDirectory';
 import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
 import { getTemplatesConfigFromFile } from '~/config/getTemplatesConfigFromFile';
@@ -15,11 +21,18 @@ import { ITemplate } from '~/template/ITemplate';
 import { saveRenderOutputToStorage } from '~/template/saveRenderOutputToStorage';
 import { IMainCommandOptions } from '~/rootCli/IMainCommandOptions';
 import { IFullConfig } from '~/config/IConfig';
+import { Logger, ILoggerConfigString } from '@dawiidio/tools/lib/node/Logger/Logger';
 
 export async function main(cliConfig: IMainCommandOptions) {
     if (cliConfig.dry) {
         console.log('\x1b[35m%s\x1b[0m', 'Dry run enabled - changes will not be saved');
     }
+
+    if (cliConfig.logLevel !== 'error') {
+        console.log('%s\x1b[35m%s\x1b[0m', 'Log level set to: ', cliConfig.logLevel);
+    }
+
+    logger.setLogLevel(Logger.parseLogLevel(cliConfig.logLevel as ILoggerConfigString));
 
     const storage = getStorage();
     const cwdPath = cwd();

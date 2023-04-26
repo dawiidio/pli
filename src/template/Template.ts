@@ -34,22 +34,22 @@ export class Template implements ITemplate {
      * @param storage
      */
     static async fetchTemplateEntriesContent(template: Template, storage: IStorage): Promise<void> {
-        await Promise.all(template.#templateEntries.map(async (entry) => {
+        await Promise.all(template.templateEntries.map(async (entry) => {
             if (!entry.content && !entry.dynamic) {
                 entry.content = await storage.read(entry.source);
             }
         }));
 
-        await Promise.all(template.#childTemplates.map((child) =>
+        await Promise.all(template.childTemplates.map((child) =>
             Template.fetchTemplateEntriesContent(child as Template, storage))
         );
     }
 
     variables: ITemplateVariable[] = [];
 
-    #templateEntries: ITemplateEntry[] = [];
+    private templateEntries: ITemplateEntry[] = [];
 
-    #childTemplates: ITemplate[] = [];
+    private childTemplates: ITemplate[] = [];
 
     constructor(
         public readonly props: ITemplateProps,
@@ -64,9 +64,9 @@ export class Template implements ITemplate {
 
         for (const t of entries) {
             if (Template.isTemplate(t)) {
-                this.#childTemplates.push(t);
+                this.childTemplates.push(t);
             } else if (TemplateEntry.isTemplateEntry(t)) {
-                this.#templateEntries.push(t);
+                this.templateEntries.push(t);
             } else {
                 throw new Error(`Unsupported value passed in entries field for template "${this.id}"`);
             }
@@ -84,11 +84,11 @@ export class Template implements ITemplate {
     }
 
     getTemplateEntries(): ITemplateEntry[] {
-        return this.#templateEntries;
+        return this.templateEntries;
     }
 
     setTemplateEntries(templateEntries: ITemplateEntry[]) {
-        this.#templateEntries = templateEntries;
+        this.templateEntries = templateEntries;
     }
 
     /**
@@ -105,21 +105,21 @@ export class Template implements ITemplate {
      * @param templateEngine
      * @param storage
      * @param parent
-     * @param isRoot
      */
     collectVariables(templateEngine: ITemplateEngine, storage: IStorage, parent?: IVariableScope): ICollectVariablesResult[] {
         const ctx = parent ? parent.spawnChild() : new VariableScope();
-        const scopeCwd = ctx.getVariableValue(BuiltinVariables.CWD);
+        const scopeCwd = this.props.defaultOutputDirectoryPath || ctx.getVariableValue(BuiltinVariables.CWD);
 
-        const extractedVariables: ITemplateVariable[] = removeVariableDuplicates(this.#templateEntries
+        const extractedVariables: ITemplateVariable[] = removeVariableDuplicates(this.templateEntries
             .flatMap((entry) => {
                 if (!entry.content)
                     throw new Error(`Entry ${entry.source} has no content to extract variables from`);
 
                 const stringVariables = new Set([
                     ...templateEngine.extractAllVariables(entry.content),
-                    ...templateEngine.extractAllVariables(this.getPathTemplateToResolve(entry.source, ctx, storage)),
+                    ...templateEngine.extractAllVariables(this.getEntryPathToResolve(entry, ctx, storage)),
                 ]);
+
                 const variables = [...stringVariables].map(v => Template.createDefaultVariableDescriptor(v));
 
                 entry.variables = variables;
@@ -144,7 +144,7 @@ export class Template implements ITemplate {
             }),
         ]);
 
-        const children = this.#childTemplates.flatMap(t => t.collectVariables(templateEngine, storage, ctx));
+        const children = this.childTemplates.flatMap(t => t.collectVariables(templateEngine, storage, ctx));
 
         return [
             {
@@ -201,20 +201,21 @@ export class Template implements ITemplate {
      * @param scope
      */
     resolveOutputMapping(templateEngine: ITemplateEngine, storage: IStorage, scope: IVariableScope): IOutputType {
-        return this.#templateEntries.reduce((acc, { source }) => {
+        return this.templateEntries.reduce((acc, entry) => {
             const cwd = scope.getVariableValue(BuiltinVariables.CWD);
             const rootCwd = scope.getVariableValue(BuiltinVariables.ROOT_CWD);
             const td = scope.getVariableValue(BuiltinVariables.TEMPLATES_DIRECTORY);
 
             const resolvedVal = templateEngine.renderTemplate(
-                storage.join(rootCwd, cwd || '', this.getPathTemplateToResolve(source, scope, storage).replace(td, '')),
+                // storage.join(rootCwd, this.props.defaultOutputDirectoryPath || '', cwd || '', this.getEntryPathToResolve(entry, scope, storage).replace(td, '')),
+                storage.join(rootCwd, cwd || '', this.getEntryPathToResolve(entry, scope, storage).replace(td, '')),
                 scope,
                 true,
             );
 
             return {
                 ...acc,
-                [source]: resolvedVal,
+                [entry.source]: resolvedVal,
             };
         }, {});
     }
@@ -234,12 +235,12 @@ export class Template implements ITemplate {
         if (templateToMergeWith.id !== this.id)
             throw new Error(`You can not merge two templates with different ID's. Current template id: "${this.id}", and template to merge with: "${templateToMergeWith.id}"`);
 
-        const mergedTemplateEntries = mergeArrays<TemplateEntry>(this.#templateEntries, templateToMergeWith.#templateEntries, {
+        const mergedTemplateEntries = mergeArrays<TemplateEntry>(this.templateEntries, templateToMergeWith.templateEntries, {
             merge: (entry1, entry2) => entry1.merge(entry2),
             findIndex: (entry1, entry2) => entry1.source === entry2.source,
         });
 
-        const mergedChildTemplates = mergeArrays<ITemplate>(this.#childTemplates, templateToMergeWith.#childTemplates, {
+        const mergedChildTemplates = mergeArrays<ITemplate>(this.childTemplates, templateToMergeWith.childTemplates, {
             merge: (entry1, entry2) => entry1.merge(entry2),
             findIndex: (entry1, entry2) => entry1.id === entry2.id,
         });
@@ -266,35 +267,35 @@ export class Template implements ITemplate {
     }
 
     getChildren(): ITemplate[] {
-        return this.#childTemplates;
+        return this.childTemplates;
     }
 
     setChildren(children: ITemplate[]) {
-        this.#childTemplates = children;
+        this.childTemplates = children;
     }
 
     protected renderTemplateEntries(templateEngine: ITemplateEngine, scope: IVariableScope): WithRequired<ITemplateEntry, 'renderedContent'>[] {
-        return this.#templateEntries
+        return this.templateEntries
             .map(entry => entry.merge({
                 renderedContent: templateEngine.renderTemplate(entry.content, scope),
             }) as WithRequired<ITemplateEntry, 'renderedContent'>);
     }
 
-    protected getPathTemplateToResolve(originalAbsolutePath: string, ctx: IVariableScope, storage: IStorage): string {
+    protected getEntryPathToResolve(entry: ITemplateEntry, ctx: IVariableScope, storage: IStorage): string {
         const { outputMapping = {} } = this.props;
         const templatesDirectory = ctx.getVariableValue(BuiltinVariables.TEMPLATES_DIRECTORY);
-        const fileFromTemplatesDirectory = originalAbsolutePath.startsWith(templatesDirectory);
+        const fileFromTemplatesDirectory = entry.source.startsWith(templatesDirectory);
 
-        if (!fileFromTemplatesDirectory && !outputMapping[originalAbsolutePath]) {
-            return storage.basename(originalAbsolutePath);
+        if (!fileFromTemplatesDirectory && !outputMapping[entry.source] && !entry.dynamic) {
+            return storage.basename(entry.source);
         }
 
         if (fileFromTemplatesDirectory) {
-            const relativePath = originalAbsolutePath.replace(`${templatesDirectory}${storage.sep}`, '');
+            const relativePath = entry.source.replace(`${templatesDirectory}${storage.sep}`, '');
 
-            return outputMapping[originalAbsolutePath] || outputMapping[relativePath] || originalAbsolutePath;
+            return outputMapping[entry.source] || outputMapping[relativePath] || entry.source;
         }
 
-        return outputMapping[originalAbsolutePath] || originalAbsolutePath;
+        return outputMapping[entry.source] || entry.source;
     }
 }

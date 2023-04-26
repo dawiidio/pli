@@ -6,6 +6,7 @@ import { createRootScope, DEFAULT_TEMPLATES_DIRNAME, BuiltinVariables } from '..
 import { TemplateEntry } from '../templateEntry/TemplateEntry';
 import { TemplateTreeRenderer } from '../templateTreeRenderer/TemplateTreeRenderer';
 import { TemplateVariable } from '../templateVariable/TemplateVariable';
+import { IVariableScope } from '../variableScope/IVariableScope';
 
 //todo uncomment
 describe('Template', () => {
@@ -63,7 +64,10 @@ describe('Template', () => {
         templateTreeRenderer.collectVariables();
         const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
 
-        // console.log('path without variable', template.resolveOutputMapping(engine, storage, scope));
+        console.log(
+            'path without variable',
+            template.resolveOutputMapping(engine, storage, scope)
+        );
 
         expect(() => template.resolveOutputMapping(engine, storage, scope)).toThrowError('Variable NAME is undefined');
     });
@@ -91,16 +95,19 @@ describe('Template', () => {
                 new TemplateEntry({
                     source: '/tmp/$NAME$/file.ts',
                     content: `Test test`,
+                    dynamic: true,
                 }),
             ],
         });
         const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
         templateTreeRenderer.collectVariables();
-        const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
+        const { scope: rootScope } = templateTreeRenderer.getBranchForTemplateId(template.id);
 
-        scope.setVariableValue('NAME', 'dirname');
+        const childScope = [...rootScope.children.values()].at(0) as IVariableScope;
 
-        expect(template.resolveOutputMapping(engine, storage, scope)).toStrictEqual(expect.objectContaining({
+        childScope?.setVariableValue('NAME', 'dirname');
+
+        expect(template.resolveOutputMapping(engine, storage, childScope)).toStrictEqual(expect.objectContaining({
             '/tmp/$NAME$/file.ts': `${rootCwd}/tmp/dirname/file.ts`,
         }));
     });
@@ -126,7 +133,7 @@ describe('Template', () => {
         }));
     });
 
-    it.only('should render many entries', async () => {
+    it('should render many entries with defaultOutputDirectoryPath set in config', async () => {
         const template = new Template({
             id: 'x',
             entries: [

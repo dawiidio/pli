@@ -22,7 +22,7 @@ export class TemplateTreeRenderer {
         this.rootBranches = this.templates.map((template) => {
             const rootScope = createRootScope({
                 ...this.rootScopeDefaults,
-                [BuiltinVariables.CWD]: template.props.defaultOutputDirectoryPath || this.rootScopeDefaults[BuiltinVariables.CWD],
+                [BuiltinVariables.CWD]: this.rootScopeDefaults[BuiltinVariables.CWD],
             });
 
             const entry = {
@@ -57,6 +57,10 @@ export class TemplateTreeRenderer {
                                        }: ICollectVariablesResult, acc: IOutputType): Promise<IOutputType> => {
             const output = scope.isRoot() ? {} : await template.render(this.templateEngine, this.storage, scope);
 
+            if (scope.isRoot()) {
+                scope.setVariableValueFromTop(BuiltinVariables.CWD, template.props.defaultOutputDirectoryPath);
+            }
+
             const mergedOutputWithAcc = {
                 ...acc,
                 ...output,
@@ -68,9 +72,7 @@ export class TemplateTreeRenderer {
             return childrenOutputs.reduce((childAcc, curr) => ({
                 ...childAcc,
                 ...curr,
-            }), {
-                ...mergedOutputWithAcc
-            });
+            }), mergedOutputWithAcc);
         };
 
         return recursiveRender(root, {});
