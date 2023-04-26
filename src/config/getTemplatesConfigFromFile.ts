@@ -122,6 +122,10 @@ export const runTsTemplatesConfigFile = async (
 };
 
 export const runJsConfigFile = async (path: string, storage: IStorage, options?: IGetConfigFromFileOptions): Promise<IConfig> => {
+    return (await import(path)).default.default;
+};
+
+export const runMjsConfigFile = async (path: string, storage: IStorage, options?: IGetConfigFromFileOptions): Promise<IConfig> => {
     return (await import(path)).default;
 };
 
@@ -138,6 +142,9 @@ export const getTemplatesConfigFromFile = async (path: string, storage: IStorage
     switch (extension) {
         case 'js':
             config = await runJsConfigFile(path, storage, options);
+            break;
+        case 'mjs':
+            config = await runMjsConfigFile(path, storage, options);
             break;
         case 'ts':
             config = await runTsTemplatesConfigFile(path, storage, options);
