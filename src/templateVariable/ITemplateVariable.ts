@@ -59,6 +59,8 @@ export interface ITemplateVariable<T = any> {
      * If true, the variable will be updated when a parent scope variable changes
      *
      * it means that transformer will be called again
+     *
+     * todo maybe same mechanism should be for variables with dependencies passed in `defaultValue` as variable names
      */
     reactive?: boolean;
 

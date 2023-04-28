@@ -3,13 +3,13 @@
 ## 0.2.2 (2023-04-26)
 
 ### Added
-- Option `watch` in `TemplateVariable`
+- Reactive variables, and new option to activate them in TemplateVariable props. Option is named `reactive` and determines if variable should react to changes in parent scopes. Default: `false`
 
 ### Fixed
 - fixed CWD overriding from cli
 
 ### Modified
-- Builtin `CWD` variable is now reactive variable which means, it reacts to changes triggered in parent scopes and creates its value based on value from parent 
+- Builtin `CWD` variable is now a reactive variable, which means it reacts to changes triggered in parent scopes, and creates its value based on value taken from parent 
 - `index` property in TemplateVariable is now placed in `ui` options object
 
 ### Removed
