@@ -7,6 +7,7 @@ import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRendere
 import { assert } from '@dawiidio/tools';
 import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
 import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
+import { BuiltinVariables } from '~/common';
 
 type Client = typeof inquirer;
 
@@ -43,7 +44,9 @@ export class TerminalCliRenderer implements ICliRenderer {
 
         const { scope } = this.templateTreeRenderer.getBranchForTemplateId(this.selectedTemplate.id as string);
 
-        assert(scope, `No variable scope found for template ${this.selectedTemplate.name}`);
+        assert(scope, `No variable scope found for template ${this.selectedTemplate.id}`);
+
+        scope.setVariableValue(BuiltinVariables.CWD, this.selectedTemplate.props.defaultOutputDirectoryPath);
 
         const values = await (this.client as Client).prompt<T>(this.createClientUiForVariableScope(scope));
 
@@ -55,7 +58,6 @@ export class TerminalCliRenderer implements ICliRenderer {
     protected createClientUiForVariableScope<T extends Answers = Answers>(ctx: IVariableScope): QuestionCollection<T> {
         this.updateIndexes(ctx);
 
-        // todo wciaz nadpisuja sie zmienne, trzeba ustalic spojny mechanizm dla CWD
         return ctx.collectAllBranchVariables()
             .filter((variable) => !variable.ui.hidden)
             .sort((variableA, variableB) => (variableB.ui?.index || DEFAULT_VARIABLE_INDEX) - (variableA.ui?.index || DEFAULT_VARIABLE_INDEX))
@@ -66,7 +68,7 @@ export class TerminalCliRenderer implements ICliRenderer {
         return {
             name: variable.name,
             message: variable.ui.message,
-            default: variable.defaultValue,
+            default: ctx.getVariableValue(variable.name) || variable.defaultValue,
             type: variable.ui.type,
             choices: variable.ui.options,
             validate: (input) => {

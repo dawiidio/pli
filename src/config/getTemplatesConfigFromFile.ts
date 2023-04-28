@@ -25,8 +25,6 @@ const getCompileCommand = ({ templatesConfigPath, outDir, rootDir }: ICompileTsS
 
 const compileTs = (storage: IStorage, compileSettings: ICompileTsSettings): Promise<void> => {
     return new Promise((resolve, reject) => {
-        console.log('created process');
-
         const compileProcess = exec(getCompileCommand(compileSettings), {
             cwd: storage.resolve(),
         });
@@ -35,15 +33,12 @@ const compileTs = (storage: IStorage, compileSettings: ICompileTsSettings): Prom
         compileProcess.stdout?.pipe(process.stdout);
 
         compileProcess.on('exit', (val) => {
-            console.log('in exit', val);
-
             compileProcess.stdout?.unpipe(process.stdout);
             compileProcess.stderr?.unpipe(process.stderr);
             resolve();
         });
 
         compileProcess.on('error', () => {
-            console.log('heeere');
             reject();
         });
     });

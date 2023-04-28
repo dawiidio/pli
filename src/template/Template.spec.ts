@@ -128,33 +128,6 @@ describe('Template', () => {
         }));
     });
 
-    it('should render many entries with defaultOutputDirectoryPath set in config', async () => {
-        const template = new Template({
-            id: 'x',
-            entries: [
-                new TemplateEntry({
-                    source: '$NAME$.ts',
-                    content: `function $NAME$() { return 'Function $NAME$'; }`,
-                }),
-                new TemplateEntry({
-                    source: '$NAME$.spec.ts',
-                    content: `test('$NAME$ should do something', () => { expect($NAME$()).toBeString(); })`,
-                }),
-            ],
-            defaultOutputDirectoryPath: 'tmp/$NAME$',
-        });
-        const templateTreeRenderer = new TemplateTreeRenderer([template], engine, storage, rootScopeDefaults);
-        templateTreeRenderer.collectVariables();
-        const { scope } = templateTreeRenderer.getBranchForTemplateId(template.id);
-
-        scope.setVariableValueFromTop('NAME', 'MyFunction');
-
-        expect(await templateTreeRenderer.render(template.id)).toStrictEqual(expect.objectContaining({
-            [`${rootCwd}/tmp/MyFunction/MyFunction.ts`]: `function MyFunction() { return 'Function MyFunction'; }`,
-            [`${rootCwd}/tmp/MyFunction/MyFunction.spec.ts`]: `test('MyFunction should do something', () => { expect(MyFunction()).toBeString(); })`,
-        }));
-    });
-
     it('should change output path to the one overwritten in output mapping', async () => {
         const template = new Template({
             id: 'x',

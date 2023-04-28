@@ -6,7 +6,8 @@
 - Reactive variables, and new option to activate them in TemplateVariable props. Option is named `reactive` and determines if variable should react to changes in parent scopes. Default: `false`
 
 ### Fixed
-- fixed CWD overriding from cli
+- `CWD` overriding from cli
+- default value for `CWD` will be now extracted from option `defaultOutputDirectoryPath` in Template. It happens in CliRenderer class after template selection in UI
 
 ### Modified
 - Builtin `CWD` variable is now a reactive variable, which means it reacts to changes triggered in parent scopes, and creates its value based on value taken from parent 

@@ -57,10 +57,6 @@ export class TemplateTreeRenderer {
                                        }: ICollectVariablesResult, acc: IOutputType): Promise<IOutputType> => {
             const output = scope.isRoot() ? {} : await template.render(this.templateEngine, this.storage, scope);
 
-            if (scope.isRoot()) {
-                scope.setVariableValueFromTop(BuiltinVariables.CWD, template.props.defaultOutputDirectoryPath);
-            }
-
             const mergedOutputWithAcc = {
                 ...acc,
                 ...output,

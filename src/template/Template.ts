@@ -108,7 +108,6 @@ export class Template implements ITemplate {
      */
     collectVariables(templateEngine: ITemplateEngine, storage: IStorage, parent?: IVariableScope): ICollectVariablesResult[] {
         const ctx = parent ? parent.spawnChild() : new VariableScope();
-        const scopeCwd = this.props.defaultOutputDirectoryPath || ctx.getVariableValue(BuiltinVariables.CWD);
 
         const extractedVariables: ITemplateVariable[] = removeVariableDuplicates(this.templateEntries
             .flatMap((entry) => {
@@ -136,7 +135,7 @@ export class Template implements ITemplate {
             ...mergedVariables,
             new TemplateVariable({
                 name: BuiltinVariables.CWD,
-                defaultValue: scopeCwd,
+                reactive: true,
                 ui: {
                     message: `Output directory`,
                     index: 1000,
