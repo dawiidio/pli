@@ -1,13 +1,7 @@
 import { getStorage } from '~/storage/getStorage';
 import { cwd } from 'node:process';
 import { searchForConfigFile } from '~/config/searchForConfigFile';
-import {
-    BuiltinVariables,
-    CACHE_DIRNAME,
-    createTreeFromPaths,
-    DEFAULT_TEMPLATES_DIRNAME,
-    logger,
-} from '~/common';
+import { BuiltinVariables, CACHE_DIRNAME, DEFAULT_TEMPLATES_DIRNAME, logger } from '~/common';
 import { extractTemplatesFromDirectory } from '~/config/extractTemplatesFromDirectory';
 import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
 import { getTemplatesConfigFromFile } from '~/config/getTemplatesConfigFromFile';
@@ -21,7 +15,8 @@ import { ITemplate } from '~/template/ITemplate';
 import { saveRenderOutputToStorage } from '~/template/saveRenderOutputToStorage';
 import { IMainCommandOptions } from '~/rootCli/IMainCommandOptions';
 import { IFullConfig } from '~/config/IConfig';
-import { Logger, ILoggerConfigString } from '@dawiidio/tools/lib/node/Logger/Logger';
+import { ILoggerConfigString, Logger } from '@dawiidio/tools/lib/node/Logger/Logger';
+import { renderTreeFromPaths } from '@dawiidio/tools/lib/node/Path/renderTreeFromPaths';
 
 export async function main(cliConfig: IMainCommandOptions) {
     if (cliConfig.dry) {
@@ -83,5 +78,5 @@ export async function main(cliConfig: IMainCommandOptions) {
     }
 
     console.log('Following structure was created inside directory \x1b[32m%s\x1b[0m', cwdPath);
-    console.log(createTreeFromPaths(Object.keys(templateOutput), cwdPath, storage).replace('\n', ''));
+    console.log(renderTreeFromPaths(Object.keys(templateOutput), cwdPath).replace('\n', ''));
 }

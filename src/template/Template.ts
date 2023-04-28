@@ -207,7 +207,6 @@ export class Template implements ITemplate {
             const td = scope.getVariableValue(BuiltinVariables.TEMPLATES_DIRECTORY);
 
             const resolvedVal = templateEngine.renderTemplate(
-                // storage.join(rootCwd, this.props.defaultOutputDirectoryPath || '', cwd || '', this.getEntryPathToResolve(entry, scope, storage).replace(td, '')),
                 storage.join(rootCwd, cwd || '', this.getEntryPathToResolve(entry, scope, storage).replace(td, '')),
                 scope,
                 true,

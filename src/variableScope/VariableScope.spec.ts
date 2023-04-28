@@ -6,8 +6,8 @@ describe('VariableScope', () => {
     it('should register variable', async () => {
         const scope = new VariableScope();
         const variable = new TemplateVariable({
-            name: 'TEST'
-        })
+            name: 'TEST',
+        });
 
         scope.registerVariable(variable);
 
@@ -17,8 +17,8 @@ describe('VariableScope', () => {
     it('should throw on attempt to register existing variable', async () => {
         const scope = new VariableScope();
         const variable = new TemplateVariable({
-            name: 'TEST'
-        })
+            name: 'TEST',
+        });
 
         scope.registerVariable(variable);
 
@@ -28,11 +28,11 @@ describe('VariableScope', () => {
     it('should set value to variable', async () => {
         const scope = new VariableScope();
         const variable = new TemplateVariable({
-            name: 'TEST'
-        })
+            name: 'TEST',
+        });
 
         scope.registerVariable(variable);
-        scope.setVariableValue('TEST', 'My value')
+        scope.setVariableValue('TEST', 'My value');
 
         expect(scope.getVariableValue('TEST')).toBe('My value');
     });
@@ -45,11 +45,11 @@ describe('VariableScope', () => {
 
         variable.pipe(
             (value: string) => parseInt(value),
-            (value: number) => value*2
-        )
+            (value: number) => value * 2,
+        );
 
         scope.registerVariable(variable);
-        scope.setVariableValue('TEST', '22')
+        scope.setVariableValue('TEST', '22');
 
         expect(scope.getVariableValue('TEST')).toBe(44);
     });
@@ -61,13 +61,13 @@ describe('VariableScope', () => {
             validate: (value, variable, ctx) => {
                 if (!Number.isSafeInteger(variable.transformValue(value, scope)))
                     throw new Error(`Invalid value "${value}" for variable ${variable.name}`);
-            }
-        })
+            },
+        });
 
         variable.pipe(
             (value: string) => parseInt(value),
-            (value: number) => value*2
-        )
+            (value: number) => value * 2,
+        );
 
         scope.registerVariable(variable);
 
@@ -163,7 +163,7 @@ describe('VariableScope', () => {
 
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         parentScope.registerVariable(variable1);
@@ -177,7 +177,7 @@ describe('VariableScope', () => {
 
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         parentScope.registerVariable(variable1);
@@ -194,19 +194,19 @@ describe('VariableScope', () => {
 
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 1
+            defaultValue: 1,
         });
         const variable2 = new TemplateVariable({
             name: 'VAR2',
-            defaultValue: 2
+            defaultValue: 2,
         });
         const variable2_1 = new TemplateVariable({
             name: 'VAR2',
-            defaultValue: 8
+            defaultValue: 8,
         });
         const variable3 = new TemplateVariable({
             name: 'VAR3',
-            defaultValue: 3
+            defaultValue: 3,
         });
 
         parentScope.registerVariable(variable1);
@@ -226,7 +226,7 @@ describe('VariableScope', () => {
 
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         childScope.registerVariable(variable1);
@@ -245,7 +245,7 @@ describe('VariableScope', () => {
 
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         childScope2.registerVariable(variable1);
@@ -256,8 +256,8 @@ describe('VariableScope', () => {
         expect(matches?.length).toBe(2);
         expect(matches).toEqual(expect.arrayContaining([
             childScope2,
-            childScope1_2
-        ]))
+            childScope1_2,
+        ]));
     });
 
     it('should find first scope with variable starting from bottom', async () => {
@@ -269,7 +269,7 @@ describe('VariableScope', () => {
 
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         rootScope.registerVariable(variable1);
@@ -285,11 +285,11 @@ describe('VariableScope', () => {
         const scope = new VariableScope();
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
         const variable2 = new TemplateVariable({
             name: 'VAR2',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         scope.registerVariable(variable1);
@@ -304,7 +304,7 @@ describe('VariableScope', () => {
         const childScope = new VariableScope();
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         childScope.registerVariable(variable1);
@@ -320,14 +320,14 @@ describe('VariableScope', () => {
         const childScope = new VariableScope();
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         childScope.registerVariable(variable1);
         scope.addChild(childScope);
 
         scope.assignValuesObjectFromTop({
-            VAR1: 88
+            VAR1: 88,
         });
 
         const obj = scope.collectAllBranchVariablesValues();
@@ -341,7 +341,7 @@ describe('VariableScope', () => {
         const childScope2 = childScope1.spawnChild();
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 12
+            defaultValue: 12,
         });
 
         childScope2.registerVariable(variable1);
@@ -355,11 +355,11 @@ describe('VariableScope', () => {
         const childScope2 = childScope1.spawnChild();
         const variable1 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: 'test'
+            defaultValue: 'test',
         });
         const variable2 = new TemplateVariable({
             name: 'VAR1',
-            defaultValue: undefined
+            defaultValue: undefined,
         });
 
         rootScope.registerVariable(variable1);
@@ -382,7 +382,7 @@ describe('VariableScope', () => {
         const variable = new TemplateVariable({
             name: 'VAR1',
             defaultValue: '',
-            reactive: true
+            reactive: true,
         }).pipe((value, variable, scope) => {
             const parentVal = scope.parent?.getVariableValue(variable.name);
 

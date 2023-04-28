@@ -1,10 +1,11 @@
 import { TemplateVariable } from '~/templateVariable/TemplateVariable';
-import { assert, ILogLevel, setObjectPropertyByPath } from '@dawiidio/tools';
+import { assert, setObjectPropertyByPath } from '@dawiidio/tools';
 import { Logger, LogLevel } from '@dawiidio/tools/lib/node/Logger/Logger';
 import * as process from 'process';
 import { IStorage } from '~/storage/IStorage';
 import { VariableScope } from '~/variableScope/VariableScope';
 import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import { renderTreeFromPaths } from '@dawiidio/tools/lib/node/Path/renderTreeFromPaths';
 
 export type { WithRequired, WithOptional } from '@dawiidio/tools';
 
@@ -84,37 +85,6 @@ export function assertAndExit<T = any>(value: any, message?: string): asserts va
         exitWithError(err instanceof Error ? err.message : (err as string));
     }
 }
-
-export const createTreeFromPaths = (paths: string[], basePath: string, storage: IStorage): string => {
-    let accObj: Record<string, any> = {};
-
-    for (const path of paths) {
-        const shortenedPath = path.replace(basePath, '');
-        accObj = {
-            ...accObj,
-            ...setObjectPropertyByPath(accObj, storage.splitPath(shortenedPath), 1),
-        };
-    }
-
-    const childSign = '├─ ';
-    const levelSign = '│  ';
-
-    const logger = (obj: Record<string, any>, currentPath: string = '', lvl = 0): string => {
-        return Object.entries(obj).reduce((acc, [key, val]) => {
-            const directory = typeof val === 'object';
-
-            if (!lvl) {
-                return acc + logger(val, currentPath, lvl + 1);
-            }
-
-            return directory
-                ? `${acc}\n${currentPath}${childSign}${key}/${logger(val, currentPath + levelSign, lvl + 1)}`
-                : `${acc}\n${currentPath}${childSign}${key}`;
-        }, '');
-    };
-
-    return logger(accObj);
-};
 
 export const removeVariableDuplicates = (variables: ITemplateVariable[]): ITemplateVariable[] => {
     const addedVariables = new Set<string>();
