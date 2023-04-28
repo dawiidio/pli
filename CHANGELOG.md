@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.2 (2023-04-26)
+## 0.2.2 (2023-04-28)
 
 ### Added
 - Reactive variables, and new option to activate them in TemplateVariable props. Option is named `reactive` and determines if variable should react to changes in parent scopes. Default: `false`
