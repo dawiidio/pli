@@ -59,7 +59,7 @@ describe('VariableScope', () => {
         const variable = new TemplateVariable({
             name: 'TEST',
             validate: (value, variable, ctx) => {
-                if (!Number.isSafeInteger(variable.transformValue(value)))
+                if (!Number.isSafeInteger(variable.transformValue(value, scope)))
                     throw new Error(`Invalid value "${value}" for variable ${variable.name}`);
             }
         })
@@ -89,18 +89,6 @@ describe('VariableScope', () => {
         scope.setVariableValue('VAR1', 'new value');
 
         expect(scope.getVariableValue('VAR2')).toBe('new value');
-    });
-
-    it('should throw error when detects attempt to circular variable subscription in the same scope', async () => {
-        const scope = new VariableScope();
-        const variable1 = new TemplateVariable({
-            name: 'VAR1',
-            defaultValue: '$VAR1$'
-        });
-
-        expect(() => {
-            scope.registerVariable(variable1);
-        }).toThrowError('Circular reference detected in subscription from default value interpolation for variable: "VAR1"');
     });
 
     it('should extract and register listeners for variable which has other valid variable name as defaultValue, and the other variable is in the higher scope', async () => {
@@ -384,5 +372,43 @@ describe('VariableScope', () => {
         const scope = new VariableScope();
 
         expect(() => scope.addChild(scope)).toThrowError();
+    });
+
+    it('should call transformer and create variable value based on it\'s inheritance chain when "reactive" option is true', async () => {
+        const rootScope = new VariableScope();
+        const childScope1 = rootScope.spawnChild();
+        const childScope2 = childScope1.spawnChild();
+        const childScope3 = childScope2.spawnChild();
+        const variable = new TemplateVariable({
+            name: 'VAR1',
+            defaultValue: '',
+            reactive: true
+        }).pipe((value, variable, scope) => {
+            const parentVal = scope.parent?.getVariableValue(variable.name);
+
+            if (!parentVal) {
+                return value;
+            }
+
+            return `${parentVal}/${value}`;
+        });
+
+        rootScope.registerVariable(variable);
+        childScope2.registerVariable(variable);
+        childScope3.registerVariable(variable);
+
+        rootScope.setVariableValue('VAR1', 'path');
+        childScope2.setVariableValue('VAR1', 'to');
+        childScope3.setVariableValue('VAR1', 'dir');
+
+        expect([
+            rootScope.getVariableValue('VAR1'),
+            childScope2.getVariableValue('VAR1'),
+            childScope3.getVariableValue('VAR1'),
+        ]).toEqual(expect.arrayContaining([
+            'path',
+            'path/to',
+            'path/to/dir',
+        ]));
     });
 });

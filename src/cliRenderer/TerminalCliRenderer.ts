@@ -1,7 +1,7 @@
 import { ICliRenderer } from '~/cliRenderer/ICliRenderer';
 import { ITemplate } from '~/template/ITemplate';
 import inquirer, { Answers, DistinctQuestion, QuestionCollection } from 'inquirer';
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import { ITemplateVariable, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable';
 import { IVariableScope } from '~/variableScope/IVariableScope';
 import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
 import { assert } from '@dawiidio/tools';
@@ -15,6 +15,7 @@ interface ITemplateSelection {
 }
 
 const VARIABLE_SORT_INDEX_STEP = 10;
+const DEFAULT_VARIABLE_INDEX = 1000;
 
 export class TerminalCliRenderer implements ICliRenderer {
     protected client: Client | undefined = inquirer;
@@ -54,9 +55,10 @@ export class TerminalCliRenderer implements ICliRenderer {
     protected createClientUiForVariableScope<T extends Answers = Answers>(ctx: IVariableScope): QuestionCollection<T> {
         this.updateIndexes(ctx);
 
+        // todo wciaz nadpisuja sie zmienne, trzeba ustalic spojny mechanizm dla CWD
         return ctx.collectAllBranchVariables()
             .filter((variable) => !variable.ui.hidden)
-            .sort((variableA, variableB) => variableB.index - variableA.index)
+            .sort((variableA, variableB) => (variableB.ui?.index || DEFAULT_VARIABLE_INDEX) - (variableA.ui?.index || DEFAULT_VARIABLE_INDEX))
             .map<DistinctQuestion<T>>((variable) => this.createClientUiForVariable<T>(variable, ctx));
     }
 
@@ -99,13 +101,14 @@ export class TerminalCliRenderer implements ICliRenderer {
         // todo variable shouldn't update it's index, it should be context dependent and be kept there - variable is just a config holder
         for (const variable of ctx.collectAllBranchVariables()) {
             const dependencies = variable.getDependencies(this.templateEngine);
-
-            variable.index += dependencies.length * (-VARIABLE_SORT_INDEX_STEP);
+            const ui = variable.ui as IVariableUiDescriptor;
+            ui.index += dependencies.length * (-VARIABLE_SORT_INDEX_STEP);
 
             dependencies.forEach((variableName) => {
                 try {
                     const variable = ctx.getVariableFromTop(variableName);
-                    variable.index += VARIABLE_SORT_INDEX_STEP;
+                    const ui2 = variable.ui as IVariableUiDescriptor;
+                    ui2.index += VARIABLE_SORT_INDEX_STEP;
                 }
                 catch (e) {
                     throw new Error(`Variable "${variableName}" passed in variable's "${variable.name}" defaultValue doesn't exist in current branch. Original message: ${(e as Error).message}`);

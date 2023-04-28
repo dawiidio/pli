@@ -18,7 +18,6 @@ export class SubscriptionScope implements ITemplateEngineContext {
         private templateEngine: ITemplateEngine,
     ) {
         this.extractVariablesToSubscribe();
-        this.checkForCircularDependenciesInVariables();
         this.initializeLocalValues();
         this.setupSubscribers();
     }
@@ -38,7 +37,10 @@ export class SubscriptionScope implements ITemplateEngineContext {
                 this.offListeners.delete(name);
             }
 
-            const eventName = this.scope.hasVariable(name) ? `${name}:change` : `${PARENT_EVENTS_PREFIX}${name}:change`;
+            let eventName = (!this.scope.hasVariable(name) || this.variable.name === name)
+                ? `${PARENT_EVENTS_PREFIX}${name}:change`
+                : `${name}:change`;
+
             const off = this.scope.on(eventName, (evName, { transformedValue }: IVariableChangeEvent) => {
                 this.variablesValues.set(name, transformedValue);
                 this.updateVariableValueInScope();
@@ -60,13 +62,5 @@ export class SubscriptionScope implements ITemplateEngineContext {
             this.variable.name,
             this.templateEngine.renderTemplate(this.variable.defaultValue, this),
         );
-    }
-
-    private checkForCircularDependenciesInVariables() {
-        this.subscribedVariablesNames.forEach((subscription) => {
-            if (subscription === this.variable.name) {
-                throw new Error(`Circular reference detected in subscription from default value interpolation for variable: "${this.variable.name}"`);
-            }
-        });
     }
 }

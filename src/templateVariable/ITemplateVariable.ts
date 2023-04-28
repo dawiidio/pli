@@ -27,7 +27,15 @@ export interface IVariableUiDescriptor {
     hidden: boolean;
 
     options: IVariableUiOption[];
+
+    /**
+     * The index of the variable in UI, higher index means the variable will be asked earlier
+     * value relies on amount of variables it depends on, each variable subtracts n from index
+     */
+    index: number
 }
+
+export type IVariableTransformer<T = any, R = any> = (val: T, variable: ITemplateVariable, scope: IVariableScope) => R;
 
 export interface ITemplateVariable<T = any> {
     name: string,
@@ -38,19 +46,27 @@ export interface ITemplateVariable<T = any> {
 
     ui: IVariableUiDescriptor;
 
-    index: number;
-
     multiple?: boolean;
 
     readonly?: boolean;
 
+    /**
+     * @preserve
+     */
     overridable?: boolean;
+
+    /**
+     * If true, the variable will be updated when a parent scope variable changes
+     *
+     * it means that transformer will be called again
+     */
+    reactive?: boolean;
 
     merge(variable: ITemplateVariable): ITemplateVariable;
 
-    pipe(...transformers: ((val: any) => any)[]): ITemplateVariable
+    pipe(...transformers: IVariableTransformer<T>[]): ITemplateVariable
 
-    transformValue(value: any): T;
+    transformValue(value: any, scope: IVariableScope): T;
 
     clone(): ITemplateVariable<T>;
 

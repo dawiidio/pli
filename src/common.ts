@@ -34,9 +34,22 @@ export const createRootScope = (defaultValues: ICreateRootScopeArgs) => {
     const root = new VariableScope();
 
     root.bulkRegisterVariables([
+        /**
+         * CWD is builtin variable, and it is reactive variable which means that it will be updated
+         * when a parent scope variable changes
+         */
         new TemplateVariable({
             name: BuiltinVariables.CWD,
             defaultValue: defaultValues.CWD,
+            reactive: true,
+        }).pipe((value, variable, scope) => {
+            const parentVal = scope.parent?.getVariableValue(variable.name);
+
+            if (!parentVal) {
+                return value;
+            }
+
+            return `${parentVal}/${value}`;
         }),
         new TemplateVariable({
             name: BuiltinVariables.ROOT_CWD,

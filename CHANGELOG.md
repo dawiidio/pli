@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.2 (2023-04-26)
+
+### Added
+- Option `watch` in `TemplateVariable`
+
+### Fixed
+- fixed CWD overriding from cli
+
+### Modified
+- Builtin `CWD` variable is now reactive variable which means, it reacts to changes triggered in parent scopes and creates its value based on value from parent 
+- `index` property in TemplateVariable is now placed in `ui` options object
+
+### Removed
+- method `getInheritanceChainForVariable` from `ITemplateVariable` interface and `TemplateVariable` class as it was no longer needed
+
+
+## 0.2.1 (2023-04-26)
+
+### Modified
+- fallback to empty arrays when merging templates
+
 ## 0.2.0 (2023-04-26)
 
 ### Added

@@ -26,7 +26,7 @@ export interface IVariableScope extends EventEmitter {
 
     setVariableValue<T = any>(name: string, value: T): void;
 
-    getVariableValue<T = any>(name: string): T | undefined
+    getVariableValue<T = any>(name: string, withFallback?: boolean): T | undefined
 
     getVariable<T = any>(name: string): ITemplateVariable;
 

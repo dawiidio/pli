@@ -1,5 +1,5 @@
 import { LazyPipe } from '@dawiidio/tools';
-import { ITemplateVariable, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable';
+import { ITemplateVariable, IVariableTransformer, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable';
 import { IVariableScope } from '~/variableScope/IVariableScope';
 import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
 
@@ -18,7 +18,7 @@ export interface IVariableProps<T = any> {
 
     overridable?: boolean;
 
-    index?: number
+    reactive?: boolean;
 }
 
 export class TemplateVariable<T = any> implements ITemplateVariable<T> {
@@ -31,13 +31,13 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
 
     public ui: IVariableUiDescriptor;
 
-    public index: number;
-
     public overridable: boolean;
 
     public readonly: boolean;
 
-    private lazyPipe = new LazyPipe<T>();
+    public reactive: boolean;
+
+    private lazyPipe = new LazyPipe<T, IVariableTransformer>();
 
     constructor({
                     validate,
@@ -47,21 +47,22 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
                     multiple,
                     readonly = false,
                     overridable = true,
-                    index = 500,
+                    reactive = false,
                 }: IVariableProps<T>) {
         this.name = name;
         this.validate = validate || this.validate;
         this.defaultValue = defaultValue;
         this.multiple = multiple || false;
         this.readonly = readonly;
-        this.index = index;
         this.overridable = overridable;
+        this.reactive = reactive;
 
         this.ui = {
             type: 'input',
             message: `Insert value for ${name} :`,
             hidden: false,
             options: [],
+            index: 1000,
             ...(ui || {}),
         };
     }
@@ -70,17 +71,16 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
         return predicate instanceof TemplateVariable;
     }
 
-    public validate: (value: T, variable: ITemplateVariable<T>, ctx: IVariableScope) => void = () => {
-    };
+    public validate: (value: T, variable: ITemplateVariable<T>, ctx: IVariableScope) => void = () => {};
 
-    pipe(...transformers: ((val: any) => any)[]): this {
+    pipe(...transformers: IVariableTransformer[]): this {
         this.lazyPipe.pipe(...transformers);
 
         return this;
     }
 
-    transformValue(value: any): T {
-        return this.lazyPipe.run(value);
+    transformValue(value: any, scope: IVariableScope): T {
+        return this.lazyPipe.run(value, this, scope);
     }
 
     merge<T = any>({
@@ -90,6 +90,7 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
                        lazyPipe,
                        defaultValue,
                        validate,
+                       reactive
                    }: TemplateVariable<T>): TemplateVariable<T> {
         const variable = new TemplateVariable<T>({
             name: name || this.name,
@@ -108,6 +109,7 @@ export class TemplateVariable<T = any> implements ITemplateVariable<T> {
             overridable: this.overridable,
             multiple: multiple || this.multiple,
             defaultValue: (defaultValue || this.defaultValue) as T,
+            reactive: reactive || this.reactive,
         });
 
         // todo merge pipeline transformers

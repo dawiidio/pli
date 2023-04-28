@@ -27,6 +27,35 @@ export class VariableScope extends EventEmitter implements IVariableScope {
 
     constructor(public parent: VariableScope | undefined = undefined) {
         super();
+        this.setupEvents();
+    }
+
+    /**
+     * setup events to propagate events from parent to children,
+     * the `reactive` option of TemplateVariable relies on those events
+     *
+     * When reactive is true, each scope takes event sent by its parent
+     * and resends it to its children, but it resends changed event with itself
+     * as scope in event. This way, children can be sure that in event is
+     * their parent scope and not some higher scope.
+     *
+     */
+    setupEvents() {
+        this.on('*', (eventName: string, ev: IVariableChangeEvent) => {
+            if (eventName.startsWith(PARENT_EVENTS_PREFIX) && ev.variable.reactive) {
+                this.children.forEach((child) => {
+                    child.trigger(eventName, {
+                        ...ev,
+                        scope: this,
+                    });
+                });
+            }
+            else if (ev.scope === this) {
+                this.children.forEach((child) => {
+                    child.trigger(`${PARENT_EVENTS_PREFIX}${eventName}`, ev);
+                });
+            }
+        });
     }
 
     spawnChild(): VariableScope {
@@ -44,7 +73,6 @@ export class VariableScope extends EventEmitter implements IVariableScope {
 
         scope.parent = this;
         this.children.add(scope as VariableScope);
-        this.pipe(scope as VariableScope, PARENT_EVENTS_PREFIX);
     }
 
     registerVariable(variable: ITemplateVariable): void {
@@ -59,14 +87,6 @@ export class VariableScope extends EventEmitter implements IVariableScope {
         if (this.templateEngine.hasVariables(defaultValue)) {
             this.subscriptionMiniScopes.set(name, new SubscriptionScope(variable, this, this.templateEngine));
         }
-
-        // this is a hack, which should not be here. We don't want to set cwd variable value if it isn't in root scope
-        // otherwise it will result in problems with resolving path set from command line
-        // paths probably should be resolved in tree walker to resolve them relative to parent's cwd
-        // so when root cwd is set then all children will keep their relative cwds and at the end they all will
-        // be resolved to absolute paths while tree rendering
-        // if (this.isRoot() && variable.name === BuiltinVariables.CWD)
-        //     return;
 
         this.variableValues.set(name, defaultValue);
         this.variableDefaultValues.set(name, defaultValue);
@@ -104,18 +124,19 @@ export class VariableScope extends EventEmitter implements IVariableScope {
             throw new Error(`Attempt to set value for readonly variable ${name}`);
 
         variable.validate(value, variable, this);
-        const transformedValue = variable.transformValue(value);
+        const transformedValue = variable.transformValue(value, scope);
         scope.variableValues.set(name, transformedValue);
         scope.trigger(`${name}:change`, {
             variable,
             transformedValue,
+            scope
         } as IVariableChangeEvent);
     }
 
-    getVariableValue<T = any>(name: string): T | undefined {
+    getVariableValue<T = any>(name: string, withFallback: boolean = true): T | undefined {
         let scope: VariableScope = this;
 
-        if (this.variableValues.get(name) === undefined) {
+        if (this.variableValues.get(name) === undefined && withFallback) {
             const temp = this.findFirstScopeFromBottomWithNonNullableVariableValue(name);
 
             if (temp === undefined) {
@@ -184,7 +205,7 @@ export class VariableScope extends EventEmitter implements IVariableScope {
 
         const allCollected = [...variablesAcc, ...thisScopeVariables];
 
-        logger.debug('Scope', this.id, 'collected vars >>>', thisScopeVariables.map(v => v.name), 'isRoot:', this.isRoot());
+        logger.debug('Scope', this.id, 'collected vars >>>', [...this.variableNameToVariableMap.values()].map(v => `${v.name}:${this.getVariableValue(v.name)}`), 'isRoot:', this.isRoot());
 
         const mergedVariables = [...this.children.values()].reduce((acc, scope) => ([
             ...acc,

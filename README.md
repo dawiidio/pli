@@ -164,7 +164,7 @@ and it will work just fine now, but we can make it even better.
 in `pli.config.ts` file add
 
 ```typescript
-import { Template, IConfig, TemplateVariable } from '@dawiidio/pli';
+import { Template, IConfig, TemplateVariable, ITemplateVariable, IVariableScope } from '@dawiidio/pli';
 
 const config: IConfig = {
     templates: [
@@ -203,7 +203,7 @@ const config: IConfig = {
                     // and then we will convert all letters to lowercase
                     // so if we type "My Component" as NAME variable value
                     // DIRNAME will be "my-component"
-                    (value: string) => value.replace(/\s/g, '-').toLowerCase()
+                    (value: string, variable: ITemplateVariable, scope: IVariableScope) => value.replace(/\s/g, '-').toLowerCase()
                 )
             ],
         })
