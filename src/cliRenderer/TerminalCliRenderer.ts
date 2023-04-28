@@ -46,6 +46,7 @@ export class TerminalCliRenderer implements ICliRenderer {
 
         assert(scope, `No variable scope found for template ${this.selectedTemplate.id}`);
 
+        // todo move it maybe some place closer to the Template, because for sure it can be set earlier than here
         scope.setVariableValue(BuiltinVariables.CWD, this.selectedTemplate.props.defaultOutputDirectoryPath);
 
         const values = await (this.client as Client).prompt<T>(this.createClientUiForVariableScope(scope));
