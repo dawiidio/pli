@@ -95,7 +95,27 @@ export function hello() {
 
 # cli
 
-```shell
+```text
+pli run
+
+runs cli, default command
+
+Commands:
+  pli run   runs cli, default command                                  [default]
+  pli init  initializes pli in current directory
+
+Options:
+      --help                Show help                                  [boolean]
+      --version             Show version number                        [boolean]
+  -c, --config              path to config file                         [string]
+  -d, --dry                 dry run, results will not be saved         [boolean]
+  -l, --logLevel            log level. Available options: error, warn, info,
+                            debug. Multiple options separated by pipe sign "|"
+                                                     [string] [default: "error"]
+  -o, --allowOverwriting    allow overwriting output files while committing data
+                            to storage                                 [boolean]
+  -t, --templatesDirectory  override templates directory
+                                                [boolean] [default: "templates"]
 
 ```
 
