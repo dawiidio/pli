@@ -122,7 +122,7 @@ Options:
 # Examples
 
 The above example is just the simplest one, you can create more sophisticated
-templates with many directories, variables and files. For examples see [https://github.com/dawiidio/pli/examples](https://github.com/dawiidio/pli/examples)
+templates with many directories, variables and files. See [examples](https://github.com/dawiidio/pli/tree/main/examples) for more
 
 # Config file
 
