@@ -12,3 +12,4 @@ dist
 test
 yarn.lock
 yarn-error.log
+pli.config.ts
