@@ -142,9 +142,9 @@ component template with support for css modules.
 run
 
 ```shell
-mkdir templates/$NAME$
-touch templates/$NAME$/$NAME$.tsx 
-touch templates/$NAME$/$NAME$.module.css
+mkdir templates/\\$NAME$
+touch templates/\\$NAME$/\\$NAME$.tsx 
+touch templates/\\$NAME$/\\$NAME$.module.css
 ```
 
 in `templates/$NAME$/$NAME$.tsx` file add
@@ -162,7 +162,7 @@ export const $NAME$:FunctionComponent<$NAME$Props> = ({  }) => {
     return (
         <div className={styles.$NAME$Root}>
             Component $NAME$
-        </>
+        </div>
     )
 };
 ```
