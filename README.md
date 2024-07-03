@@ -129,10 +129,10 @@ templates with many directories, variables and files. See [examples](https://git
 to create more powerful tools and templates the config file may be needed, run
 
 ```shell
-# for javascript config file run
-pli init -c -t js
 # for typescript config file run
 pli init -c
+# for javascript config file run
+pli init -c -t js
 ```
 
 the above command creates `pli.config.js` or `pli.config.ts` file in current directory,
