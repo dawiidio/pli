@@ -1,6 +1,6 @@
 {
   "name": "@dawiidio/pli",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "create CLI for any project within a few minutes with Pli and keep it along with your project!",
   "author": {
     "email": "dawid@dawiid.io",
