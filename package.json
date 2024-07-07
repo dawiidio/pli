@@ -58,7 +58,7 @@
   },
   "packageManager": "yarn@1.22.19",
   "peerDependencies": {
-    "typescript": "^4.6.4"
+    "typescript": "^5.5.2"
   },
   "peerDependenciesMeta": {
     "typescript": {
