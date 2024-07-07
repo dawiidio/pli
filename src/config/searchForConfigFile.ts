@@ -1,5 +1,5 @@
-import { IStorage } from '~/storage/IStorage';
-import { DEFAULT_CONFIG_FILENAMES } from '~/common';
+import { IStorage } from '~/storage/IStorage.js';
+import { DEFAULT_CONFIG_FILENAMES } from '~/common.js';
 
 export const searchForConfigFile = async (storage: IStorage, basePath: string): Promise<string | undefined> => {
     const found = await Promise.all(DEFAULT_CONFIG_FILENAMES.map(async (filename) => {

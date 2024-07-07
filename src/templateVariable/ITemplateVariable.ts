@@ -1,5 +1,5 @@
-import { IVariableScope } from '~/variableScope/IVariableScope';
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
+import { IVariableScope } from '~/variableScope/IVariableScope.js';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
 
 export type IVariableUiType = 'input' |
     'number' |

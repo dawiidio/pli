@@ -1,7 +1,7 @@
-import { IFullConfig } from '~/config/IConfig';
-import { Template } from '~/template/Template';
-import { IStorage } from '~/storage/IStorage';
-import { ITemplate } from '~/template/ITemplate';
+import { IFullConfig } from '~/config/IConfig.js';
+import { Template } from '~/template/Template.js';
+import { IStorage } from '~/storage/IStorage.js';
+import { ITemplate } from '~/template/ITemplate.js';
 
 export const fetchTemplateEntriesContent = async (templates: ITemplate[], storage: IStorage): Promise<void> => {
     const cache = new Map<string, string>();

@@ -1,6 +1,6 @@
-import { IStorage } from '~/storage/IStorage';
-import { getStorage } from '~/storage/getStorage';
-import { DEFAULT_TEMPLATES_DIRNAME, ISupportedFileTypes } from '~/common';
+import { IStorage } from '~/storage/IStorage.js';
+import { getStorage } from '~/storage/getStorage.js';
+import { DEFAULT_TEMPLATES_DIRNAME, ISupportedFileTypes } from '~/common.js';
 
 const INITIAL_TEMPLATES: Record<ISupportedFileTypes, { filename: string, content: string }> = {
     ts: {

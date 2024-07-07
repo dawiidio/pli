@@ -1,13 +1,13 @@
-import { ICliRenderer } from '~/cliRenderer/ICliRenderer';
-import { ITemplate } from '~/template/ITemplate';
+import type { ICliRenderer } from '~/cliRenderer/ICliRenderer.js';
+import type { ITemplate } from '~/template/ITemplate.js';
 import inquirer, { Answers, DistinctQuestion, QuestionCollection } from 'inquirer';
-import { ITemplateVariable, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable';
-import { IVariableScope } from '~/variableScope/IVariableScope';
-import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
+import type { ITemplateVariable, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable.js';
+import type { IVariableScope } from '~/variableScope/IVariableScope.js';
+import type { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer.js';
 import { assert } from '@dawiidio/tools';
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
-import { BuiltinVariables } from '~/common';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
+import { getTemplateEngine } from '~/templateEngine/getTemplateEngine.js';
+import { BuiltinVariables } from '~/common.js';
 
 type Client = typeof inquirer;
 

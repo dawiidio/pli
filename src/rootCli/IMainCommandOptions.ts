@@ -1,5 +1,5 @@
-import { ILoggerConfigString } from '@dawiidio/tools/lib/node/Logger/Logger';
-import { ISupportedFileTypes } from '~/common';
+import { ILoggerConfigString } from '@dawiidio/tools/lib/node/Logger/Logger.js';
+import { ISupportedFileTypes } from '~/common.js';
 
 export interface IMainCommandOptions {
     config: string;

@@ -1,4 +1,4 @@
-import { ITemplate } from '~/template/ITemplate';
+import type { ITemplate } from '~/template/ITemplate.js';
 
 export interface ICliRenderer {
     selectedTemplate: ITemplate | undefined;

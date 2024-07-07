@@ -1,5 +1,5 @@
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
-import { WithOptional } from '~/common';
+import { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
+import { WithOptional } from '~/common.js';
 
 export interface ITemplateEntry {
     source: string;

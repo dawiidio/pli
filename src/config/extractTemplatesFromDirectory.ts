@@ -1,10 +1,10 @@
-import { IStorage } from '~/storage/IStorage';
-import { getStorage } from '~/storage/getStorage';
-import { ITemplate } from '~/template/ITemplate';
-import { Template } from '~/template/Template';
-import { assertAndExit, exitWithError } from '~/common';
-import { ITemplateEntry } from '~/templateEntry/ITemplateEntry';
-import { TemplateEntry } from '~/templateEntry/TemplateEntry';
+import { IStorage } from '~/storage/IStorage.js';
+import { getStorage } from '~/storage/getStorage.js';
+import { ITemplate } from '~/template/ITemplate.js';
+import { Template } from '~/template/Template.js';
+import { assertAndExit, exitWithError } from '~/common.js';
+import { ITemplateEntry } from '~/templateEntry/ITemplateEntry.js';
+import { TemplateEntry } from '~/templateEntry/TemplateEntry.js';
 
 export const extractTemplatesFromDirectory = async (templatesPath: string, storage: IStorage = getStorage()): Promise<ITemplate[]> => {
     try {

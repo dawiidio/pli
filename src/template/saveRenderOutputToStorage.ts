@@ -1,6 +1,6 @@
-import { IStorage } from '~/storage/IStorage';
-import { FileSystemStorage } from '~/storage/adapter/FileSystemStorage';
-import { exitWithError } from '~/common';
+import { IStorage } from '~/storage/IStorage.js';
+import { FileSystemStorage } from '~/storage/adapter/FileSystemStorage.js';
+import { exitWithError } from '~/common.js';
 
 interface ISaveRenderOutputToStorageOptions {
     allowOverwriting?: boolean
@@ -30,6 +30,7 @@ export const saveRenderOutputToStorage = async (renderOutput: Record<string, str
                 await storage.access(path, FileSystemStorage.modes.W);
                 exitWithError(`Error occurred while saving output to storage. Changes haven't been saved. Original error message:\nOverwriting is disabled and file ${path} already exists`);
             }
+            // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
             catch {}
         }
     }

@@ -1,9 +1,9 @@
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { IOutputType } from '~/template/Template';
-import { IStorage } from '~/storage/IStorage';
-import { ITemplateEntry } from '~/templateEntry/ITemplateEntry';
-import { IVariableScope } from '~/variableScope/IVariableScope';
-import { ITemplateProps } from '~/template/ITemplateProps';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
+import { IOutputType } from '~/template/Template.js';
+import { IStorage } from '~/storage/IStorage.js';
+import { ITemplateEntry } from '~/templateEntry/ITemplateEntry.js';
+import { IVariableScope } from '~/variableScope/IVariableScope.js';
+import { ITemplateProps } from '~/template/ITemplateProps.js';
 
 export interface ICollectVariablesResult {
     template: ITemplate;

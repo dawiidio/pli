@@ -1,4 +1,4 @@
-import type { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import type { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
 import type { EventEmitter } from '@dawiidio/tools';
 
 export interface IVariableChangeEvent {

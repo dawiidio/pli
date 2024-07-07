@@ -1,4 +1,4 @@
-import { ITemplate } from '~/template/ITemplate';
+import { ITemplate } from '~/template/ITemplate.js';
 
 export interface IFullConfig {
     templates: ITemplate[],

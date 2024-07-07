@@ -1,5 +1,5 @@
-import { ITemplateEntry, ITemplateEntryProps } from '~/templateEntry/ITemplateEntry';
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import { ITemplateEntry, ITemplateEntryProps } from '~/templateEntry/ITemplateEntry.js';
+import { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
 
 export class TemplateEntry implements ITemplateEntry {
     public readonly source: string;

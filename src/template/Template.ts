@@ -1,15 +1,15 @@
-import { TemplateVariable } from '~/templateVariable/TemplateVariable';
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
+import { TemplateVariable } from '~/templateVariable/TemplateVariable.js';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
 import { assert, mergeArrays } from '@dawiidio/tools';
-import { ICollectVariablesResult, ITemplate } from '~/template/ITemplate';
-import { BuiltinVariables, checkForVariableDuplicates, removeVariableDuplicates, WithRequired } from '~/common';
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
-import { IStorage } from '~/storage/IStorage';
-import { ITemplateEntry } from '~/templateEntry/ITemplateEntry';
-import { TemplateEntry } from '~/templateEntry/TemplateEntry';
-import { IVariableScope } from '~/variableScope/IVariableScope';
-import { VariableScope } from '~/variableScope/VariableScope';
-import { ITemplateProps } from '~/template/ITemplateProps';
+import { ICollectVariablesResult, ITemplate } from '~/template/ITemplate.js';
+import { BuiltinVariables, checkForVariableDuplicates, removeVariableDuplicates, WithRequired } from '~/common.js';
+import { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
+import { IStorage } from '~/storage/IStorage.js';
+import { ITemplateEntry } from '~/templateEntry/ITemplateEntry.js';
+import { TemplateEntry } from '~/templateEntry/TemplateEntry.js';
+import { IVariableScope } from '~/variableScope/IVariableScope.js';
+import { VariableScope } from '~/variableScope/VariableScope.js';
+import { ITemplateProps } from '~/template/ITemplateProps.js';
 
 export type IBaseTemplateTypes = ITemplate | ITemplateEntry;
 

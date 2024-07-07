@@ -1,10 +1,10 @@
 import yargs from 'yargs/yargs';
 import { hideBin } from 'yargs/helpers';
-import { argv } from 'node:process';
 import { Argv } from 'yargs';
-import { IInitCommandOptions, IMainCommandOptions } from '~/rootCli/IMainCommandOptions';
-import { main } from '~/rootCli/commands/main';
-import { init } from '~/rootCli/commands/init';
+import { argv } from 'node:process';
+import { IInitCommandOptions, IMainCommandOptions } from '~/rootCli/IMainCommandOptions.js';
+import { main } from '~/rootCli/commands/main.js';
+import { init } from '~/rootCli/commands/init.js';
 
 const DEFAULT_CLI_OPTIONS: Partial<IMainCommandOptions> = {
     dry: false,

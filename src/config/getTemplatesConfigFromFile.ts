@@ -1,9 +1,9 @@
 import { extname, resolve } from 'path';
-import { IConfig, IFullConfig } from '~/config/IConfig';
-import { IStorage } from '~/storage/IStorage';
+import { IConfig, IFullConfig } from '~/config/IConfig.js';
+import { IStorage } from '~/storage/IStorage.js';
 import { exec } from 'node:child_process';
 import * as process from 'process';
-import { assertAndExit, CACHE_DIRNAME, DEFAULT_CONFIG_FILENAME, exitWithError } from '~/common';
+import { assertAndExit, CACHE_DIRNAME, DEFAULT_CONFIG_FILENAME, exitWithError } from '~/common.js';
 import { createHash } from 'crypto';
 
 const DEFAULT_CONFIG: IFullConfig = {
@@ -11,7 +11,6 @@ const DEFAULT_CONFIG: IFullConfig = {
 };
 
 interface ICompileTsSettings {
-
     templatesConfigPath: string;
 
     outDir: string;
@@ -19,11 +18,18 @@ interface ICompileTsSettings {
     rootDir: string;
 }
 
-const getCompileCommand = ({ templatesConfigPath, outDir, rootDir }: ICompileTsSettings): string => {
-    return `tsc ${templatesConfigPath} --outDir ${outDir} --rootDir ${rootDir} --declaration false --module nodenext --skipDefaultLibCheck true`;
+const getCompileCommand = ({
+    templatesConfigPath,
+    outDir,
+    rootDir,
+}: ICompileTsSettings): string => {
+    return `tsc ${templatesConfigPath} --outDir ${outDir} --rootDir ${rootDir} --declaration false --module NodeNext --moduleResolution NodeNext --skipDefaultLibCheck true`;
 };
 
-const compileTs = (storage: IStorage, compileSettings: ICompileTsSettings): Promise<void> => {
+const compileTs = (
+    storage: IStorage,
+    compileSettings: ICompileTsSettings,
+): Promise<void> => {
     return new Promise((resolve, reject) => {
         const compileProcess = exec(getCompileCommand(compileSettings), {
             cwd: storage.resolve(),
@@ -45,7 +51,11 @@ const compileTs = (storage: IStorage, compileSettings: ICompileTsSettings): Prom
 };
 
 const CONFIG_HASH_FILENAME = 'config-hash.txt';
-const saveConfigFileHashInCache = async (storage: IStorage, hash: string, cacheDir: string = CACHE_DIRNAME) => {
+const saveConfigFileHashInCache = async (
+    storage: IStorage,
+    hash: string,
+    cacheDir: string = CACHE_DIRNAME,
+) => {
     await storage.write(storage.join(cacheDir, CONFIG_HASH_FILENAME), hash);
 };
 
@@ -53,18 +63,31 @@ const getHash = (content: string): string => {
     return createHash('md5').update(content).digest('base64');
 };
 
-const checkIfConfigFileChangedAndReturnNewHash = async (storage: IStorage, currentConfigFilePath: string, cacheDir: string = CACHE_DIRNAME): Promise<false | string> => {
+const checkIfConfigFileChangedAndReturnNewHash = async (
+    storage: IStorage,
+    currentConfigFilePath: string,
+    cacheDir: string = CACHE_DIRNAME,
+    pathToCompiledConfig: string,
+): Promise<false | string> => {
     const pathToCacheHashFile = storage.join(cacheDir, CONFIG_HASH_FILENAME);
     let prevHash = '';
 
     try {
         prevHash = await storage.read(pathToCacheHashFile);
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: <explanation>
+    } catch {}
+
+    const currentConfigHash = getHash(
+        await storage.read(currentConfigFilePath),
+    );
+
+    try {
+        await storage.access(pathToCompiledConfig);
     } catch {
+        return currentConfigHash;
     }
 
-    const currentConfigHash = getHash(await storage.read(currentConfigFilePath));
-
-    return (currentConfigHash === prevHash) ? false : currentConfigHash;
+    return currentConfigHash === prevHash ? false : currentConfigHash;
 };
 
 export const runTsTemplatesConfigFile = async (
@@ -78,7 +101,9 @@ export const runTsTemplatesConfigFile = async (
     try {
         await storage.access(pathToTemplatesConfig);
     } catch {
-        exitWithError(`Config file not found under the path ${pathToTemplatesConfig}`);
+        exitWithError(
+            `Config file not found under the path ${pathToTemplatesConfig}`,
+        );
     }
 
     try {
@@ -87,19 +112,31 @@ export const runTsTemplatesConfigFile = async (
         await storage.createDir(resolve(cacheDir));
     }
 
-    const newHash = await checkIfConfigFileChangedAndReturnNewHash(storage, pathToTemplatesConfig, cacheDir);
-
-    const pathToCompiledConfig = storage.join(tsOutputDir, DEFAULT_CONFIG_FILENAME);
+    const pathToCompiledConfig = storage.join(
+        tsOutputDir,
+        `${DEFAULT_CONFIG_FILENAME}.js`,
+    );
+    const newHash = await checkIfConfigFileChangedAndReturnNewHash(
+        storage,
+        pathToTemplatesConfig,
+        cacheDir,
+        pathToCompiledConfig,
+    );
 
     if (newHash) {
-        console.log('\x1b[35m%s\x1b[0m', 'Config file changes detected, recompiling...');
+        console.log(
+            '\x1b[35m%s\x1b[0m',
+            'Config file changes detected, recompiling...',
+        );
 
         await saveConfigFileHashInCache(storage, newHash, cacheDir);
 
         try {
             await import('typescript');
         } catch {
-            exitWithError(`To use TypeScript config you must install typescript. Run "npm install typescript" in your console`);
+            exitWithError(
+                `To use TypeScript config you must install typescript. Run "npm install typescript" in your console`,
+            );
         }
 
         await compileTs(storage, {
@@ -111,26 +148,41 @@ export const runTsTemplatesConfigFile = async (
 
     const { default: config } = await import(pathToCompiledConfig);
 
-    assertAndExit(config, `Config in ${DEFAULT_CONFIG_FILENAME}.ts must be exported as default`);
+    assertAndExit(
+        config,
+        `Config in ${DEFAULT_CONFIG_FILENAME}.ts must be exported as default`,
+    );
 
     return config as IFullConfig;
 };
 
-export const runJsConfigFile = async (path: string, storage: IStorage, options?: IGetConfigFromFileOptions): Promise<IConfig> => {
+export const runJsConfigFile = async (
+    path: string,
+    storage: IStorage,
+    options?: IGetConfigFromFileOptions,
+): Promise<IConfig> => {
     return (await import(path)).default.default;
 };
 
-export const runMjsConfigFile = async (path: string, storage: IStorage, options?: IGetConfigFromFileOptions): Promise<IConfig> => {
+export const runMjsConfigFile = async (
+    path: string,
+    storage: IStorage,
+    options?: IGetConfigFromFileOptions,
+): Promise<IConfig> => {
     return (await import(path)).default;
 };
 
 export interface IGetConfigFromFileOptions {
-    compilerOptions?: Record<string, any>,
+    compilerOptions?: Record<string, any>;
 
-    cacheDir?: string
+    cacheDir?: string;
 }
 
-export const getTemplatesConfigFromFile = async (path: string, storage: IStorage, options: IGetConfigFromFileOptions = {}): Promise<IFullConfig> => {
+export const getTemplatesConfigFromFile = async (
+    path: string,
+    storage: IStorage,
+    options: IGetConfigFromFileOptions = {},
+): Promise<IFullConfig> => {
     const extension = extname(path).replace('.', '');
     let config: IConfig;
 

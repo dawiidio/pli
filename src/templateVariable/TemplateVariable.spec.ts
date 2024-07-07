@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { TemplateVariable } from './TemplateVariable';
+import { TemplateVariable } from './TemplateVariable.js';
 
 describe('TemplateVariable', () => {
     it('should transform value in pipe to valid type and resolve variable with the same value and type', async () => {

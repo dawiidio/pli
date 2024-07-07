@@ -1,6 +1,6 @@
 import { readdirRecursively } from '@dawiidio/tools';
-import { promises, constants } from 'node:fs';
-import { extname, relative, sep, resolve, join, dirname, basename } from 'path';
+import { constants, promises } from 'node:fs';
+import { basename, dirname, extname, join, relative, resolve, sep } from 'path';
 
 const { readFile, writeFile, mkdir, access } = promises;
 const { W_OK, R_OK } = constants;
@@ -9,7 +9,7 @@ export class FileSystemStorage {
     static modes = {
         W: W_OK,
         R: R_OK,
-    }
+    };
 
     static sep = sep;
 
@@ -21,7 +21,7 @@ export class FileSystemStorage {
         await writeFile(path, content);
     }
 
-    static async access(path: string, mode?: number): Promise<void> {
+    static async access(path: string): Promise<void> {
         await access(path);
     }
 
@@ -31,7 +31,7 @@ export class FileSystemStorage {
 
     static createDir(path: string): Promise<string | undefined> {
         return mkdir(path, {
-            recursive: true
+            recursive: true,
         });
     }
 
@@ -39,7 +39,7 @@ export class FileSystemStorage {
         return Boolean(extname(path));
     }
 
-    static splitPath(path: string, forcedSep = sep): string[] {
+    static splitPath(path: string): string[] {
         return path.split(sep);
     }
 

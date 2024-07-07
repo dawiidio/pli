@@ -10,7 +10,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "strict": true,
-    "baseUrl": ".",
+    "baseUrl": "./",
     "declaration": true,
     "paths": {
       "~/*": ["src/*"]
@@ -21,8 +21,8 @@
     "removeComments": true,
     "rootDir": "src",
     "module": "NodeNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "NodeNext",
     "outDir": "lib",
     "target": "ES2022"
-  }
+  },
 }

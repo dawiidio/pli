@@ -1,4 +1,4 @@
-import { ITemplateEngineContext } from '~/templateEngine/ITemplateEngineContext';
+import { ITemplateEngineContext } from '~/templateEngine/ITemplateEngineContext.js';
 
 export interface ITemplateEngine {
     extractAllVariables(text: string): string[];

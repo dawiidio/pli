@@ -4,7 +4,7 @@
   "exclude": ["**/*.spec.ts"],
   "compilerOptions": {
     "rootDir": "src",
-    "module": "CommonJS",
+    "module": "NodeNext",
     "outDir": "lib",
     "moduleResolution": "NodeNext",
     "target": "ES2022",

@@ -1,5 +1,5 @@
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { ITemplateEngineContext } from '~/templateEngine/ITemplateEngineContext';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
+import { ITemplateEngineContext } from '~/templateEngine/ITemplateEngineContext.js';
 
 export class BaseTemplateEngine implements ITemplateEngine {
     static readonly globalVariableRegex = /\$([\w\d]+)\$/g;

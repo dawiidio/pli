@@ -1,11 +1,8 @@
-import { TemplateVariable } from '~/templateVariable/TemplateVariable';
-import { assert, setObjectPropertyByPath } from '@dawiidio/tools';
-import { Logger, LogLevel } from '@dawiidio/tools/lib/node/Logger/Logger';
-import * as process from 'process';
-import { IStorage } from '~/storage/IStorage';
-import { VariableScope } from '~/variableScope/VariableScope';
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
-import { renderTreeFromPaths } from '@dawiidio/tools/lib/node/Path/renderTreeFromPaths';
+import { TemplateVariable } from '~/templateVariable/TemplateVariable.js';
+import { Logger, LogLevel } from '@dawiidio/tools/lib/node/Logger/Logger.js';
+import { VariableScope } from '~/variableScope/VariableScope.js';
+import { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
+import assert from 'node:assert';
 
 export type { WithRequired, WithOptional } from '@dawiidio/tools';
 
@@ -17,16 +14,17 @@ export const DEFAULT_TEMPLATES_DIRNAME = 'templates';
 
 export type ISupportedFileTypes = 'ts' | 'js' | 'mjs';
 
-export const DEFAULT_CONFIG_FILENAMES: `${typeof DEFAULT_CONFIG_FILENAME}.${ISupportedFileTypes}`[] = [
-    `${DEFAULT_CONFIG_FILENAME}.ts`,
-    `${DEFAULT_CONFIG_FILENAME}.js`,
-    `${DEFAULT_CONFIG_FILENAME}.mjs`,
-];
+export const DEFAULT_CONFIG_FILENAMES: `${typeof DEFAULT_CONFIG_FILENAME}.${ISupportedFileTypes}`[] =
+    [
+        `${DEFAULT_CONFIG_FILENAME}.ts`,
+        `${DEFAULT_CONFIG_FILENAME}.js`,
+        `${DEFAULT_CONFIG_FILENAME}.mjs`,
+    ];
 
 export enum BuiltinVariables {
     CWD = 'CWD',
     ROOT_CWD = 'ROOT_CWD',
-    TEMPLATES_DIRECTORY = 'TEMPLATES_DIRECTORY'
+    TEMPLATES_DIRECTORY = 'TEMPLATES_DIRECTORY',
 }
 
 export type ICreateRootScopeArgs = Record<BuiltinVariables, any>;
@@ -78,15 +76,20 @@ export const exitWithError = (err: string | Error) => {
     process.exit(1);
 };
 
-export function assertAndExit<T = any>(value: any, message?: string): asserts value is NonNullable<T> {
+export function assertAndExit<T = any>(
+    value: any,
+    message?: string,
+): asserts value is NonNullable<T> {
     try {
-        assert<T>(value, message);
+        assert(value, message);
     } catch (err) {
         exitWithError(err instanceof Error ? err.message : (err as string));
     }
 }
 
-export const removeVariableDuplicates = (variables: ITemplateVariable[]): ITemplateVariable[] => {
+export const removeVariableDuplicates = (
+    variables: ITemplateVariable[],
+): ITemplateVariable[] => {
     const addedVariables = new Set<string>();
 
     return variables.filter((variable) => {
@@ -99,12 +102,16 @@ export const removeVariableDuplicates = (variables: ITemplateVariable[]): ITempl
     });
 };
 
-export const checkForVariableDuplicates = (variables: ITemplateVariable[]): ITemplateVariable[] => {
+export const checkForVariableDuplicates = (
+    variables: ITemplateVariable[],
+): ITemplateVariable[] => {
     const addedVariables = new Set<string>();
 
     return variables.map((variable) => {
         if (addedVariables.has(variable.name)) {
-            throw new Error(`Variable ${variable.name} is defined multiple times`);
+            throw new Error(
+                `Variable ${variable.name} is defined multiple times`,
+            );
         }
 
         addedVariables.add(variable.name);
@@ -113,7 +120,6 @@ export const checkForVariableDuplicates = (variables: ITemplateVariable[]): ITem
 };
 
 class EnhancedLogger extends Logger {
-
     error(...args: any[]) {
         this.log(this.stringifyArgs(args), {
             logLevel: LogLevel.error,
@@ -137,7 +143,9 @@ class EnhancedLogger extends Logger {
     }
 
     private stringifyArgs(args: any[]): string {
-        return args.map((val) => JSON.stringify(val).replaceAll('"', '')).join(' ');
+        return args
+            .map((val) => JSON.stringify(val).replaceAll('"', ''))
+            .join(' ');
     }
 }
 

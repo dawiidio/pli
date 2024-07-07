@@ -1,5 +1,5 @@
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
-import { IBaseTemplateTypes, IOutputType } from '~/template/Template';
+import { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
+import { IBaseTemplateTypes, IOutputType } from '~/template/Template.js';
 
 export interface ITemplateProps {
 

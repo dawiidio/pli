@@ -10,6 +10,7 @@
   "bin": {
     "pli": "lib/index.js"
   },
+  "type": "module",
   "main": "lib/exports.js",
   "types": "lib/exports.d.ts",
   "repository": {
@@ -37,7 +38,7 @@
     "prepublishOnly": "npm run build",
     "watch": "tsc -p ./tsconfig.json --watch",
     "watch-alias": "tsc-alias -p ./tsconfig.json --watch",
-    "start": "node --experimental-modules lib/index.js",
+    "start": "node lib/index.js",
     "build": "npm run build:node",
     "build:node": "tsc -p ./tsconfig.json && tsc-alias -p ./tsconfig.json",
     "test": "vitest"
@@ -46,16 +47,11 @@
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/node": "^18.15.3",
     "@types/yargs": "^17.0.22",
-    "@typescript-eslint/eslint-plugin": "^5.45.1",
-    "@typescript-eslint/parser": "^5.47.0",
-    "eslint": "^8.30.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
-    "prettier": "2.6.2",
     "rollup-plugin-typescript-paths": "^1.3.0",
     "tsc-alias": "^1.8.2",
+    "tsconfig-paths": "^4.2.0",
     "tslib": "^2.4.0",
-    "typescript": "4.9.5",
+    "typescript": "^5.5.2",
     "vite": "5.2.6",
     "vite-tsconfig-paths": "^4.0.5",
     "vitest": "^0.25.3"
@@ -70,11 +66,13 @@
     }
   },
   "dependencies": {
+    "@biomejs/biome": "^1.8.3",
     "@dawiidio/tools": "0.7.3",
     "@types/inquirer": "^9.0.3",
     "commander": "^10.0.0",
-    "inquirer": "^8.2.5",
+    "inquirer": "^9.3.3",
     "ts-node": "^10.9.1",
+    "vite-plugin-biome": "^1.0.12",
     "yargs": "^17.7.1"
   }
 }

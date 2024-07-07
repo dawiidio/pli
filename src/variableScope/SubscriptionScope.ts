@@ -1,9 +1,9 @@
-import { IVariableChangeEvent, IVariableScope } from '~/variableScope/IVariableScope';
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { PARENT_EVENTS_PREFIX } from '~/common';
-import { ITemplateEngineContext } from '~/templateEngine/ITemplateEngineContext';
+import { IVariableChangeEvent, IVariableScope } from '~/variableScope/IVariableScope.js';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
+import { PARENT_EVENTS_PREFIX } from '~/common.js';
+import { ITemplateEngineContext } from '~/templateEngine/ITemplateEngineContext.js';
 import { OffListener } from '@dawiidio/tools';
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
+import { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
 
 export class SubscriptionScope implements ITemplateEngineContext {
     private subscribedVariablesNames = new Set<string>();

@@ -1,6 +1,6 @@
-import { TerminalCliRenderer } from '~/cliRenderer/TerminalCliRenderer';
-import { ICliRenderer } from '~/cliRenderer/ICliRenderer';
-import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
+import { TerminalCliRenderer } from '~/cliRenderer/TerminalCliRenderer.js';
+import { ICliRenderer } from '~/cliRenderer/ICliRenderer.js';
+import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer.js';
 
 export type IRendererType = 'cli';
 export const getCliRenderer = (type: IRendererType, templateTreeRenderer: TemplateTreeRenderer): ICliRenderer => {

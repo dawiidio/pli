@@ -1,9 +1,9 @@
-import { getStorage } from '~/storage/getStorage';
+import { getStorage } from '~/storage/getStorage.js';
 import process from 'process';
-import { initConfigFile } from '~/config/initConfigFile';
-import { DEFAULT_TEMPLATES_DIRNAME } from '~/common';
-import { initTemplatesDirectory } from '~/config/initTemplatesDirectory';
-import { IInitCommandOptions } from '~/rootCli/IMainCommandOptions';
+import { initConfigFile } from '~/config/initConfigFile.js';
+import { DEFAULT_TEMPLATES_DIRNAME } from '~/common.js';
+import { initTemplatesDirectory } from '~/config/initTemplatesDirectory.js';
+import { IInitCommandOptions } from '~/rootCli/IMainCommandOptions.js';
 
 export async function init(argv: IInitCommandOptions) {
     // todo refactor below function as well as initConfigFile and initTemplatesDirectory because it looks messy

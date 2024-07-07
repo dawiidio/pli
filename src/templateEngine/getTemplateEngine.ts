@@ -1,5 +1,5 @@
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { BaseTemplateEngine } from '~/templateEngine/adapters/BaseTemplateEngine';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
+import { BaseTemplateEngine } from '~/templateEngine/adapters/BaseTemplateEngine.js';
 
 export type ITemplateEngineType = 'base';
 

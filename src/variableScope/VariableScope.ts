@@ -1,11 +1,11 @@
-import { ITemplateVariable } from '~/templateVariable/ITemplateVariable';
 import { assert, copyObjectWithin, EventEmitter } from '@dawiidio/tools';
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
-import { IVariableChangeEvent, IVariableScope } from '~/variableScope/IVariableScope';
+import { getTemplateEngine } from '~/templateEngine/getTemplateEngine.js';
+import { logger, PARENT_EVENTS_PREFIX } from '~/common.js';
 import { randomUUID } from 'node:crypto';
-import { SubscriptionScope } from '~/variableScope/SubscriptionScope';
-import { logger, PARENT_EVENTS_PREFIX } from '~/common';
+import { SubscriptionScope } from '~/variableScope/SubscriptionScope.js';
+import type { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
+import type { ITemplateVariable } from '~/templateVariable/ITemplateVariable.js';
+import type { IVariableChangeEvent, IVariableScope } from '~/variableScope/IVariableScope.js';
 
 
 export class VariableScope extends EventEmitter implements IVariableScope {

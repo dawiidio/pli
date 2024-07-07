@@ -1,7 +1,7 @@
 import { LazyPipe } from '@dawiidio/tools';
-import { ITemplateVariable, IVariableTransformer, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable';
-import { IVariableScope } from '~/variableScope/IVariableScope';
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
+import { ITemplateVariable, IVariableTransformer, IVariableUiDescriptor } from '~/templateVariable/ITemplateVariable.js';
+import { IVariableScope } from '~/variableScope/IVariableScope.js';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
 
 export interface IVariableProps<T = any> {
     name: string,

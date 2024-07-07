@@ -1,8 +1,8 @@
-import { ICollectVariablesResult, ITemplate } from '~/template/ITemplate';
-import { ITemplateEngine } from '~/templateEngine/ITemplateEngine';
-import { IStorage } from '~/storage/IStorage';
-import { createRootScope, BuiltinVariables, ICreateRootScopeArgs } from '~/common';
-import { IOutputType } from '~/template/Template';
+import { ICollectVariablesResult, ITemplate } from '~/template/ITemplate.js';
+import { ITemplateEngine } from '~/templateEngine/ITemplateEngine.js';
+import { IStorage } from '~/storage/IStorage.js';
+import { createRootScope, BuiltinVariables, ICreateRootScopeArgs } from '~/common.js';
+import { IOutputType } from '~/template/Template.js';
 import { assert } from '@dawiidio/tools';
 
 export class TemplateTreeRenderer {

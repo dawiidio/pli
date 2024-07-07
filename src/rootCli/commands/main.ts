@@ -1,22 +1,22 @@
-import { getStorage } from '~/storage/getStorage';
+import { getStorage } from '~/storage/getStorage.js';
 import { cwd } from 'node:process';
-import { searchForConfigFile } from '~/config/searchForConfigFile';
-import { BuiltinVariables, CACHE_DIRNAME, DEFAULT_TEMPLATES_DIRNAME, logger } from '~/common';
-import { extractTemplatesFromDirectory } from '~/config/extractTemplatesFromDirectory';
-import { getTemplateEngine } from '~/templateEngine/getTemplateEngine';
-import { getTemplatesConfigFromFile } from '~/config/getTemplatesConfigFromFile';
+import { searchForConfigFile } from '~/config/searchForConfigFile.js';
+import { BuiltinVariables, CACHE_DIRNAME, DEFAULT_TEMPLATES_DIRNAME, logger } from '~/common.js';
+import { extractTemplatesFromDirectory } from '~/config/extractTemplatesFromDirectory.js';
+import { getTemplateEngine } from '~/templateEngine/getTemplateEngine.js';
+import { getTemplatesConfigFromFile } from '~/config/getTemplatesConfigFromFile.js';
 import {
     mergeRootConfigTemplatesWithExtractedTemplates,
-} from '~/config/mergeRootConfigTemplatesWithExtractedTemplates';
-import { fetchTemplateEntriesContent } from '~/config/fetchTemplateEntriesContent';
-import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer';
-import { getCliRenderer } from '~/cliRenderer/getCliRenderer';
-import { ITemplate } from '~/template/ITemplate';
-import { saveRenderOutputToStorage } from '~/template/saveRenderOutputToStorage';
-import { IMainCommandOptions } from '~/rootCli/IMainCommandOptions';
-import { IFullConfig } from '~/config/IConfig';
-import { ILoggerConfigString, Logger } from '@dawiidio/tools/lib/node/Logger/Logger';
-import { renderTreeFromPaths } from '@dawiidio/tools/lib/node/Path/renderTreeFromPaths';
+} from '~/config/mergeRootConfigTemplatesWithExtractedTemplates.js';
+import { fetchTemplateEntriesContent } from '~/config/fetchTemplateEntriesContent.js';
+import { TemplateTreeRenderer } from '~/templateTreeRenderer/TemplateTreeRenderer.js';
+import { getCliRenderer } from '~/cliRenderer/getCliRenderer.js';
+import { ITemplate } from '~/template/ITemplate.js';
+import { saveRenderOutputToStorage } from '~/template/saveRenderOutputToStorage.js';
+import { IMainCommandOptions } from '~/rootCli/IMainCommandOptions.js';
+import { IFullConfig } from '~/config/IConfig.js';
+import { ILoggerConfigString, Logger } from '@dawiidio/tools/lib/node/Logger/Logger.js';
+import { renderTreeFromPaths } from '@dawiidio/tools/lib/node/Path/renderTreeFromPaths.js';
 
 export async function main(cliConfig: IMainCommandOptions) {
     if (cliConfig.dry) {

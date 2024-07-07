@@ -1,4 +1,4 @@
-import { ITemplate } from '~/template/ITemplate';
+import { ITemplate } from '~/template/ITemplate.js';
 import { mergeArrays } from '@dawiidio/tools';
 
 export const mergeRootConfigTemplatesWithExtractedTemplates = (configTemplates: ITemplate[], extractedTemplates: ITemplate[]): ITemplate[] => {

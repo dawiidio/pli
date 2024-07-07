@@ -1,5 +1,5 @@
-import { IStorage } from '~/storage/IStorage';
-import { FileSystemStorage } from '~/storage/adapter/FileSystemStorage';
+import { IStorage } from '~/storage/IStorage.js';
+import { FileSystemStorage } from '~/storage/adapter/FileSystemStorage.js';
 
 export type IStorageType = 'fs';
 
